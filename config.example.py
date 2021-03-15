@@ -1,0 +1,21 @@
+# copy this file to config.py and change settings
+#
+
+EMAIL = "bot@example.org"
+USERNAME = "@bot:matrix.org"
+PASSWORD = "xxxxxx"
+SERVER = "https://example.org"
+
+# Room to join
+ROOM = "!123:matrix.org"
+
+# number of seconds to wait between update checks
+SLEEP_TIME = 10
+
+# URL to get metrics of WA pusher
+METRICS_URL = "https://pusher.wa.binary-kitchen.de/metrics"
+
+# Kind of _/global/example.org/
+# the part before map.json
+#
+ROOM_PREFIX = "_/global/das-labor.github.io/workadv_das-labor/"
