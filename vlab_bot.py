@@ -7,6 +7,7 @@ import logging
 
 LOGFILE = 'vlab_bot.log'
 
+# unused so far
 async def message_callback(room: MatrixRoom, event: RoomMessageText) -> None:
     logging.debug('msg recvd')
     logging.debug(
@@ -20,14 +21,14 @@ async def main() -> None:
     #client.add_event_callback(message_callback, RoomMessageText)
 
     await client.login(config.PASSWORD)
-    # "Logged in as @alice:example.org device id: RANDOMDID"
 
     logging.info(f'joining room {config.ROOM}')    
     await client.join(config.ROOM)
 
-    logging.info(f'starting loop with loop sleeptime {config.SLEEP_TIME}')
     # last two entries measured
     clients_history = [0,0]
+
+    logging.info(f'starting loop with loop sleeptime {config.SLEEP_TIME}')
     while True:
         time.sleep(config.SLEEP_TIME)
         logging.debug(f'number of clients: history: {clients_history}')
@@ -44,7 +45,7 @@ async def main() -> None:
             message_type="m.room.message",
             content = {
                 "msgtype": "m.text",
-                "body": f"Online {clients_history[0]}"
+                "body": f"{clients_history[0]} Entitäten sind derzeit im virtuellen Labor. https://virtuallab.das-labor.org"
             }
         )
 

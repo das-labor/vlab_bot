@@ -4,6 +4,7 @@ from config import METRICS_URL, ROOM_PREFIX
 NUM_CLIENTS_MARKER = 'workadventure_nb_clients_per_room'
 
 def number_of_clients(room):
+    'Return the numnber of clients in the given room inside a WA instance.'
     with urlopen(METRICS_URL) as f:
         lines = f.readlines()
 
