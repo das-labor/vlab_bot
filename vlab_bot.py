@@ -31,14 +31,17 @@ async def main() -> None:
     logging.info(f'starting loop with loop sleeptime {config.SLEEP_TIME}')
     while True:
         clients_in_room = wa_status.number_of_clients(room='main')
-        if clients_in_room is None:
+        # Sometimes room is missing (None) or an incorrect number of 0 is
+        # returned from the metrics. Ignoring these values.
+        if clients_in_room is None or clients_in_room==0:
             continue
-        
         logging.debug(f'{clients_in_room} clients in room')
+        
         clients_history.pop(-1)
         clients_history = [clients_in_room] + clients_history
-        logging.debug(f'number of clients in vlab: history: {clients_history}')
-        # do nothing if history unchanged
+        logging.debug(f'number of clients in vlab history: {clients_history}')
+
+        # check if history unchanged
         if clients_history[0]>0 and clients_history[0] != clients_history[1]:
             logging.debug('Sending msg to channel')
             await client.room_send(
@@ -46,8 +49,10 @@ async def main() -> None:
                 room_id=config.ROOM,
                 message_type="m.room.message",
                 content = {
-                    "msgtype": "m.text",
-                    "body": f"Ich habe {clients_history[0]} Entitäten im virtuellen Labor gesichtet. https://virtuallab.das-labor.org"
+                    "msgtype": "m.text", 
+                    "format": "org.matrix.custom.html",
+                    "formatted_body": f'Ich habe <b>{clients_in_room}</b> Entitäten im <a href="https://virtuallab.das-labor.org">virtuellen Labor</a> gesichtet.',
+                    "body": f"Ich habe {clients_in_room} Entitäten im virtuellen Labor gesichtet. https://virtuallab.das-labor.org"
                 }
             )
 
