@@ -30,9 +30,9 @@ async def main() -> None:
 
     logging.info(f'starting loop with loop sleeptime {config.SLEEP_TIME}')
     while True:
-        logging.debug(f'number of clients in vlab: history: {clients_history}')
         clients_history.pop(-1)
         clients_history = [wa_status.number_of_clients('main')] + clients_history
+        logging.debug(f'number of clients in vlab: history: {clients_history}')
         # do nothing if history unchanged
         if clients_history[0]>0 and clients_history[0] == clients_history[1]:
             logging.debug('Sending msg to channel')
