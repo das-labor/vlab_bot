@@ -1,5 +1,6 @@
 from urllib.request import urlopen
 from config import METRICS_URL, ROOM_PREFIX
+import logging
 
 NUM_CLIENTS_MARKER = 'workadventure_nb_clients_per_room'
 
@@ -17,3 +18,7 @@ def number_of_clients(room):
             # workadventure_nb_clients_per_room{room="_/global/das-labor.github.io/workadv_das-labor/main.json"} 20
             number_of_clients_online = int(line_str.split('} ')[1])
             return number_of_clients_online
+
+    # no room found
+    logging.warn(f'Room {room} not found in metrics')
+    return None

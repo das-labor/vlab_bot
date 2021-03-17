@@ -30,8 +30,13 @@ async def main() -> None:
 
     logging.info(f'starting loop with loop sleeptime {config.SLEEP_TIME}')
     while True:
+        clients_in_room = wa_status.number_of_clients(room='main')
+        if clients_in_room is None:
+            continue
+        
+        logging.debug(f'{clients_in_room} clients in room')
         clients_history.pop(-1)
-        clients_history = [wa_status.number_of_clients('main')] + clients_history
+        clients_history = [clients_in_room] + clients_history
         logging.debug(f'number of clients in vlab: history: {clients_history}')
         # do nothing if history unchanged
         if clients_history[0]>0 and clients_history[0] != clients_history[1]:
@@ -42,7 +47,7 @@ async def main() -> None:
                 message_type="m.room.message",
                 content = {
                     "msgtype": "m.text",
-                    "body": f"{clients_history[0]} Entitäten sind derzeit im virtuellen Labor. https://virtuallab.das-labor.org"
+                    "body": f"Ich habe {clients_history[0]} Entitäten im virtuellen Labor gesichtet. https://virtuallab.das-labor.org"
                 }
             )
 
