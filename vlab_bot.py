@@ -30,25 +30,29 @@ async def main() -> None:
 
     logging.info(f'starting loop with loop sleeptime {config.SLEEP_TIME}')
     while True:
-        time.sleep(config.SLEEP_TIME)
-        logging.debug(f'number of clients: history: {clients_history}')
+        logging.debug(f'number of clients in vlab: history: {clients_history}')
         clients_history.pop(0)
         clients_history.append(wa_status.number_of_clients('main'))
         # do nothing if history unchanged
-        if clients_history[0]<=0 or clients_history[0] == clients_history[1]:
-            continue
+        if clients_history[0]>0 and clients_history[0] == clients_history[1]:
+            logging.debug('Sending msg to channel')
+            await client.room_send(
+                # Watch out! If you join an old room you'll see lots of old messages
+                room_id=config.ROOM,
+                message_type="m.room.message",
+                content = {
+                    "msgtype": "m.text",
+                    "body": f"{clients_history[0]} Entitäten sind derzeit im virtuellen Labor. https://virtuallab.das-labor.org"
+                }
+            )
 
-        logging.debug('Sending msg to channel')
-        await client.room_send(
-            # Watch out! If you join an old room you'll see lots of old messages
-            room_id=config.ROOM,
-            message_type="m.room.message",
-            content = {
-                "msgtype": "m.text",
-                "body": f"{clients_history[0]} Entitäten sind derzeit im virtuellen Labor. https://virtuallab.das-labor.org"
-            }
-        )
+        if not config.RUN_IN_LOOP:
+            logging.debug('Stopping loop')
+            break
 
+        time.sleep(config.SLEEP_TIME)
+
+    await client.close()
     #await client.sync_forever(timeout=30000) # milliseconds
 
 logging.basicConfig(filename=LOGFILE, 

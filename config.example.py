@@ -19,3 +19,6 @@ METRICS_URL = "https://pusher.wa.binary-kitchen.de/metrics"
 # the part before map.json
 #
 ROOM_PREFIX = "_/global/das-labor.github.io/workadv_das-labor/"
+
+# Run in a loop or just once - e.g. used for cronjob
+RUN_IN_LOOP = True
