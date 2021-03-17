@@ -4,3 +4,4 @@ __pycache__/
 
 config.py
 vlab_bot.log
+vlab_bot.db

@@ -4,8 +4,38 @@ import config
 from nio import AsyncClient, MatrixRoom, RoomMessageText
 import wa_status
 import logging
+import sqlite3
 
 LOGFILE = 'vlab_bot.log'
+DBFILE = 'vlab_bot.db'
+DBCON = sqlite3.connect(DBFILE)
+
+
+def init_db():
+    c = DBCON.cursor()
+    c.execute('''
+    CREATE TABLE IF NOT EXISTS usersinlab
+    (
+        id INTEGER PRIMARY KEY,
+        `date` DATE DEFAULT CURRENT_TIMESTAMP,
+        number_of_clients INTEGER
+    )
+    ''')
+    DBCON.commit()
+
+def remember_users(numusers):
+    with DBCON:
+        DBCON.execute('INSERT INTO usersinlab (number_of_clients) VALUES (?)',
+            (numusers,))
+
+def get_last_num_clients(num):
+    'Get last "num" clients seen and remembered.'
+    with DBCON:
+        rows = DBCON.execute('''
+            SELECT number_of_clients FROM usersinlab
+            ORDER BY date DESC LIMIT ?
+            ''', (num,))
+        return [r[0] for r in rows]
 
 # unused so far
 async def message_callback(room: MatrixRoom, event: RoomMessageText) -> None:
@@ -25,9 +55,6 @@ async def main() -> None:
     logging.info(f'joining room {config.ROOM}')    
     await client.join(config.ROOM)
 
-    # last two entries measured
-    clients_history = [0,0]
-
     logging.info(f'starting loop with loop sleeptime {config.SLEEP_TIME}')
     while True:
         clients_in_room = wa_status.number_of_clients(room='main')
@@ -35,17 +62,16 @@ async def main() -> None:
         # returned from the metrics. Ignoring these values.
         if clients_in_room is None or clients_in_room==0:
             continue
+        remember_users(clients_in_room)
         logging.debug(f'{clients_in_room} clients in room')
         
-        clients_history.pop(-1)
-        clients_history = [clients_in_room] + clients_history
+        clients_history = get_last_num_clients(num=2)
         logging.debug(f'number of clients in vlab history: {clients_history}')
 
         # check if history unchanged
         if clients_history[0]>0 and clients_history[0] != clients_history[1]:
             logging.debug('Sending msg to channel')
             await client.room_send(
-                # Watch out! If you join an old room you'll see lots of old messages
                 room_id=config.ROOM,
                 message_type="m.room.message",
                 content = {
@@ -72,5 +98,7 @@ logging.basicConfig(filename=LOGFILE,
 # add stream handler for logging to console, too
 logging.getLogger().addHandler(logging.StreamHandler())
 logging.info("Starting bot")
+
+init_db()
 
 asyncio.get_event_loop().run_until_complete(main())
