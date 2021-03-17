@@ -70,17 +70,18 @@ async def main() -> None:
 
         # check if history unchanged
         if clients_history[0]>0 and clients_history[0] != clients_history[1]:
-            logging.debug('Sending msg to channel')
-            await client.room_send(
-                room_id=config.ROOM,
-                message_type="m.room.message",
-                content = {
-                    "msgtype": "m.text", 
-                    "format": "org.matrix.custom.html",
-                    "formatted_body": f'Ich habe <b>{clients_in_room}</b> Entitäten im <a href="https://virtuallab.das-labor.org">virtuellen Labor</a> gesichtet.',
-                    "body": f"Ich habe {clients_in_room} Entitäten im virtuellen Labor gesichtet. https://virtuallab.das-labor.org"
-                }
-            )
+            if config.SEND_MESSAGES:
+                logging.debug('Sending msg to channel')
+                await client.room_send(
+                    room_id=config.ROOM,
+                    message_type="m.room.message",
+                    content = {
+                        "msgtype": "m.text",
+                        "format": "org.matrix.custom.html",
+                        "formatted_body": f'Ich habe <b>{clients_in_room}</b> Entitäten im <a href="https://virtuallab.das-labor.org">virtuellen Labor</a> gesichtet.',
+                        "body": f"Ich habe {clients_in_room} Entitäten im virtuellen Labor gesichtet. https://virtuallab.das-labor.org"
+                    }
+                )
 
         if not config.RUN_IN_LOOP:
             logging.debug('Stoping loop')

@@ -22,3 +22,6 @@ ROOM_PREFIX = "_/global/das-labor.github.io/workadv_das-labor/"
 
 # Run in a loop or just once - e.g. used for cronjob
 RUN_IN_LOOP = True
+
+# Whether to send messages - for debugging
+SEND_MESSAGES = True
