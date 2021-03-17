@@ -47,7 +47,7 @@ async def main() -> None:
             )
 
         if not config.RUN_IN_LOOP:
-            logging.debug('Stopping loop')
+            logging.debug('Stoping loop')
             break
 
         time.sleep(config.SLEEP_TIME)
