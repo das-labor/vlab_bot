@@ -17,7 +17,8 @@ def init_db():
     CREATE TABLE IF NOT EXISTS usersinlab
     (
         id INTEGER PRIMARY KEY,
-        `date` DATE DEFAULT CURRENT_TIMESTAMP,
+        -- using datetime function to respect timezone
+        `date` DATETIME DEFAULT (datetime('now','localtime')),
         number_of_clients INTEGER
     )
     ''')
