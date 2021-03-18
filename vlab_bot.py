@@ -13,13 +13,18 @@ DBCON = sqlite3.connect(DBFILE)
 
 def init_db():
     c = DBCON.cursor()
-    c.execute('''
+    c.executescript('''
     CREATE TABLE IF NOT EXISTS usersinlab
     (
         id INTEGER PRIMARY KEY,
         -- using datetime function to respect timezone
         `date` DATETIME DEFAULT (datetime('now','localtime')),
         number_of_clients INTEGER
+    );
+    CREATE TABLE IF NOT EXISTS messages (
+        id INTEGER PRIMARY KEY,
+        `date` DATETIME DEFAULT (datetime('now','localtime')),
+        announced_number INTEGER
     )
     ''')
     DBCON.commit()
@@ -27,6 +32,11 @@ def init_db():
 def remember_users(numusers):
     with DBCON:
         DBCON.execute('INSERT INTO usersinlab (number_of_clients) VALUES (?)',
+            (numusers,))
+
+def remember_message(numusers):
+    with DBCON:
+        DBCON.execute('INSERT INTO messages (announced_number) VALUES (?)',
             (numusers,))
 
 def get_last_num_clients(num):
@@ -45,6 +55,16 @@ async def message_callback(room: MatrixRoom, event: RoomMessageText) -> None:
         f"Message received in room {room.display_name}\n"
         f"{room.user_name(event.sender)} | {event.body}"
     )
+
+def seconds_since_last_msg():
+    'check whether enough time has elapsed for sending a msg'
+
+    query = '''
+    SELECT strftime("%s",datetime('now','localtime'))-strftime("%s",date) 
+    FROM messages ORDER BY date DESC LIMIT 1
+    '''
+    with DBCON:
+        return DBCON.execute(query).fetchone()[0]
 
 async def main() -> None:
     logging.info(f'connecting {config.USERNAME}')
@@ -69,20 +89,23 @@ async def main() -> None:
         clients_history = get_last_num_clients(num=2)
         logging.debug(f'number of clients in vlab history: {clients_history}')
 
-        # check if history unchanged
-        if clients_history[0]>0 and clients_history[0] != clients_history[1]:
-            if config.SEND_MESSAGES:
-                logging.debug('Sending msg to channel')
-                await client.room_send(
-                    room_id=config.ROOM,
-                    message_type="m.room.message",
-                    content = {
-                        "msgtype": "m.text",
-                        "format": "org.matrix.custom.html",
-                        "formatted_body": f'Ich habe <b>{clients_in_room}</b> Entitäten im <a href="https://virtuallab.das-labor.org">virtuellen Labor</a> gesichtet.',
-                        "body": f"Ich habe {clients_in_room} Entitäten im virtuellen Labor gesichtet. https://virtuallab.das-labor.org"
-                    }
-                )
+        # check if history unchanged and enough time has elapsed
+        if seconds_since_last_msg()>config.MIN_SECONDS_SINCE_LAST_MESSAGE and \
+            clients_history[0]>0 and clients_history[0] != clients_history[1] and \
+            config.SEND_MESSAGES:
+
+            logging.debug('Sending msg to channel')
+            remember_message(clients_in_room)
+            await client.room_send(
+                room_id=config.ROOM,
+                message_type="m.room.message",
+                content = {
+                    "msgtype": "m.text",
+                    "format": "org.matrix.custom.html",
+                    "formatted_body": f'Ich habe <b>{clients_in_room}</b> Entitäten im <a href="https://virtuallab.das-labor.org">virtuellen Labor</a> gesichtet.',
+                    "body": f"Ich habe {clients_in_room} Entitäten im virtuellen Labor gesichtet. https://virtuallab.das-labor.org"
+                }
+            )
 
         if not config.RUN_IN_LOOP:
             logging.debug('Stoping loop')

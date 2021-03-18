@@ -25,3 +25,6 @@ RUN_IN_LOOP = True
 
 # Whether to send messages - for debugging
 SEND_MESSAGES = True
+
+# Minimal number of seconds since last message
+MIN_SECONDS_SINCE_LAST_MESSAGE = 60 * 5
