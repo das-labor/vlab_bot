@@ -57,12 +57,14 @@ async def message_callback(room: MatrixRoom, event: RoomMessageText) -> None:
     )
 
 def seconds_since_last_msg():
-    'check whether enough time has elapsed for sending a msg'
+    'retrieve number of seconds since last message sent.'
 
+    # %s will transform datetime value into unixepoch (seconds sincs 1970-01-01)
+    # https://sqlite.org/lang_datefunc.html
     query = '''
-    SELECT strftime("%s",datetime('now','localtime'))-strftime("%s",date) 
-    FROM messages ORDER BY date DESC LIMIT 1
-    '''
+        SELECT strftime("%s",datetime('now','localtime'))-strftime("%s",date) 
+        FROM messages ORDER BY date DESC LIMIT 1
+        '''
     with DBCON:
         return DBCON.execute(query).fetchone()[0]
 
