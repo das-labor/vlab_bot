@@ -28,3 +28,7 @@ SEND_MESSAGES = True
 
 # Minimal number of seconds since last message
 MIN_SECONDS_SINCE_LAST_MESSAGE = 60 * 5
+
+# Threshold: number of clients seen in given time period
+MIN_NUM_CLIENTS_SEEN = 10
+TIME_PERIOD_MINUTES = 10

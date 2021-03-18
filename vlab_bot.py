@@ -48,7 +48,22 @@ def get_last_num_clients(num):
             ''', (num,))
         return [r[0] for r in rows]
 
-# unused so far
+def get_num_clients(timeperiod_minutes): # TODO remove
+    'return number of clients seen in the given time period'
+    now_local = 'datetime("now","localtime")'
+    query = f'''
+        SELECT SUM(number_of_clients)
+        FROM usersinlab
+        WHERE date BETWEEN 
+            datetime({now_local}, '-{timeperiod_minutes} minutes') 
+            AND
+            {now_local}            
+    '''
+    with DBCON:
+        num = DBCON.execute(query).fetchone()[0]
+        return num if num is not None else 0
+
+# unused so far, TODO remove
 async def message_callback(room: MatrixRoom, event: RoomMessageText) -> None:
     logging.debug('msg recvd')
     logging.debug(
@@ -67,6 +82,21 @@ def seconds_since_last_msg():
         '''
     with DBCON:
         return DBCON.execute(query).fetchone()[0]
+
+async def announce(client:AsyncClient, clients_in_room):
+    logging.debug('Sending msg to channel')
+    remember_message(clients_in_room)
+    await client.room_send(
+        room_id=config.ROOM,
+        message_type="m.room.message",
+        content = {
+            "msgtype": "m.text",
+            "format": "org.matrix.custom.html",
+            "formatted_body": f'Ich habe <b>{clients_in_room}</b> Entitäten im <a href="https://virtuallab.das-labor.org">virtuellen Labor</a> gesichtet.',
+            "body": f"Ich habe {clients_in_room} Entitäten im virtuellen Labor gesichtet. https://virtuallab.das-labor.org"
+        }
+    )
+
 
 async def main() -> None:
     logging.info(f'connecting {config.USERNAME}')
@@ -88,26 +118,12 @@ async def main() -> None:
         remember_users(clients_in_room)
         logging.debug(f'{clients_in_room} clients in room')
         
-        clients_history = get_last_num_clients(num=2)
-        logging.debug(f'number of clients in vlab history: {clients_history}')
-
-        # check if history unchanged and enough time has elapsed
+        # check if message should be send
         if seconds_since_last_msg()>config.MIN_SECONDS_SINCE_LAST_MESSAGE and \
-            clients_history[0]>0 and clients_history[0] != clients_history[1] and \
+            get_num_clients(config.TIME_PERIOD_MINUTES) > config.MIN_NUM_CLIENTS_SEEN and \
             config.SEND_MESSAGES:
 
-            logging.debug('Sending msg to channel')
-            remember_message(clients_in_room)
-            await client.room_send(
-                room_id=config.ROOM,
-                message_type="m.room.message",
-                content = {
-                    "msgtype": "m.text",
-                    "format": "org.matrix.custom.html",
-                    "formatted_body": f'Ich habe <b>{clients_in_room}</b> Entitäten im <a href="https://virtuallab.das-labor.org">virtuellen Labor</a> gesichtet.',
-                    "body": f"Ich habe {clients_in_room} Entitäten im virtuellen Labor gesichtet. https://virtuallab.das-labor.org"
-                }
-            )
+            await announce(client, clients_in_room)
 
         if not config.RUN_IN_LOOP:
             logging.debug('Stoping loop')
