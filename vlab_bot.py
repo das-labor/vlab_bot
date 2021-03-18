@@ -21,7 +21,8 @@ def init_db():
         `date` DATETIME DEFAULT (datetime('now','localtime')),
         number_of_clients INTEGER
     );
-    CREATE TABLE IF NOT EXISTS messages (
+    CREATE TABLE IF NOT EXISTS messages 
+    (
         id INTEGER PRIMARY KEY,
         `date` DATETIME DEFAULT (datetime('now','localtime')),
         announced_number INTEGER
@@ -39,16 +40,7 @@ def remember_message(numusers):
         DBCON.execute('INSERT INTO messages (announced_number) VALUES (?)',
             (numusers,))
 
-def get_last_num_clients(num):
-    'Get last "num" clients seen and remembered.'
-    with DBCON:
-        rows = DBCON.execute('''
-            SELECT number_of_clients FROM usersinlab
-            ORDER BY date DESC LIMIT ?
-            ''', (num,))
-        return [r[0] for r in rows]
-
-def get_num_clients(timeperiod_minutes): # TODO remove
+def get_num_clients(timeperiod_minutes): 
     'return number of clients seen in the given time period'
     now_local = 'datetime("now","localtime")'
     query = f'''
