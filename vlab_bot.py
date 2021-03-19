@@ -26,7 +26,11 @@ def init_db():
         id INTEGER PRIMARY KEY,
         `date` DATETIME DEFAULT (datetime('now','localtime')),
         announced_number INTEGER
-    )
+    );
+    CREATE VIEW IF NOT EXISTS usersinlab_delta AS
+    SELECT u2.id, u2.date, u2.number_of_clients, u1.number_of_clients-u2.number_of_clients AS number_of_clients_delta
+    FROM usersinlab u1, usersinlab u2
+    WHERE u1.id+1=u2.id;
     ''')
     DBCON.commit()
 
