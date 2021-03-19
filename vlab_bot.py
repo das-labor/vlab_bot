@@ -5,6 +5,7 @@ from nio import AsyncClient, MatrixRoom, RoomMessageText
 import wa_status
 import logging
 import sqlite3
+import sys
 
 LOGFILE = 'vlab_bot.log'
 DBFILE = 'vlab_bot.db'
@@ -77,7 +78,8 @@ def seconds_since_last_msg():
         FROM messages ORDER BY date DESC LIMIT 1
         '''
     with DBCON:
-        return DBCON.execute(query).fetchone()[0]
+        row = DBCON.execute(query).fetchone()
+        return row[0] if row else sys.maxsize
 
 async def announce(client:AsyncClient, clients_in_room):
     logging.debug('Sending msg to channel')
