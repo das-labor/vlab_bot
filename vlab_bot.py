@@ -13,30 +13,29 @@ DBCON = sqlite3.connect(DBFILE)
 
 
 def init_db():
-    c = DBCON.cursor()
-    c.executescript('''
-    CREATE TABLE IF NOT EXISTS usersinlab
-    (
-        id INTEGER PRIMARY KEY,
-        -- using datetime function to respect timezone
-        `date` DATETIME DEFAULT (datetime('now','localtime')),
-        number_of_clients INTEGER
-    );
-    CREATE TABLE IF NOT EXISTS messages 
-    (
-        id INTEGER PRIMARY KEY,
-        `date` DATETIME DEFAULT (datetime('now','localtime')),
-        announced_number INTEGER
-    );
-    DROP VIEW IF EXISTS usersinlab_delta;
-    CREATE VIEW IF NOT EXISTS usersinlab_delta AS
-    SELECT 
-      u2.id, u2.date, u2.number_of_clients, 
-      u2.number_of_clients-u1.number_of_clients AS number_of_clients_delta
-    FROM usersinlab u1, usersinlab u2
-    WHERE u2.id = u1.id + 1;
-    ''')
-    DBCON.commit()
+    with DBCON:
+        DBCON.executescript('''
+        CREATE TABLE IF NOT EXISTS usersinlab
+        (
+            id INTEGER PRIMARY KEY,
+            -- using datetime function to respect timezone
+            `date` DATETIME DEFAULT (datetime('now','localtime')),
+            number_of_clients INTEGER
+        );
+        CREATE TABLE IF NOT EXISTS messages 
+        (
+            id INTEGER PRIMARY KEY,
+            `date` DATETIME DEFAULT (datetime('now','localtime')),
+            announced_number INTEGER
+        );
+        DROP VIEW IF EXISTS usersinlab_delta;
+        CREATE VIEW IF NOT EXISTS usersinlab_delta AS
+        SELECT 
+        u2.id, u2.date, u2.number_of_clients, 
+        u2.number_of_clients-u1.number_of_clients AS number_of_clients_delta
+        FROM usersinlab u1, usersinlab u2
+        WHERE u2.id = u1.id + 1;
+        ''')
 
 def remember_users(numusers):
     with DBCON:
