@@ -60,8 +60,8 @@ def get_num_clients(timeperiod_minutes):
             {now_local}            
     '''
     with DBCON:
-        num = DBCON.execute(query).fetchone()[0]
-        return num if num is not None else 0
+        num = DBCON.execute(query).fetchone()
+        return num[0] if num else 0
 
 # unused so far, TODO remove
 async def message_callback(room: MatrixRoom, event: RoomMessageText) -> None:
