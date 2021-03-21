@@ -2,6 +2,7 @@ venv/
 .vscode/
 .idea/
 __pycache__/
+hemppa.git
 
 config.py
 vlab_bot.log
