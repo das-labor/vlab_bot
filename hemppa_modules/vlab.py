@@ -36,7 +36,13 @@ class MatrixModule(BotModule):
         if room is None:
             return
 
-        num = self.number_of_clients('main')
+        # try to fetch metric
+        num = 0
+        tries = 5
+        while num==0 and tries > 0:
+            num = self.number_of_clients('main')
+            tries -= 1
+
         if num > 0:
             await self.announce(bot, room, num)
             self.last_intrinsic_announcement = time.time()
@@ -63,5 +69,5 @@ class MatrixModule(BotModule):
                 return number_of_clients_online
 
         # no room found
-        logging.warn(f'Room {room} not found in metrics')
+        self.logger.warn(f'Room {room} not found in metrics')
         return None
