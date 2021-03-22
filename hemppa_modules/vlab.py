@@ -22,6 +22,12 @@ class MatrixModule(BotModule):
         num = self.number_of_clients('main')
         await self.announce(bot, room, num)
 
+        # TODO num will be negative until WA instance has been upgraded
+        # https://twitter.com/pintman/status/1371909456762638336
+        if num < 0:
+            await bot.send_text(room, 
+                "Wenn die Zahl negativ ist, liegt dies an einem bekannten Problem auf der Instanz. Hier hilft nur abwarten. Techniker ist informiert :)")
+
     def help(self):
         return "Ein Bot für das virtuelle Labor"
 
@@ -35,8 +41,6 @@ class MatrixModule(BotModule):
         if room is None:
             return
 
-        # TODO num will be negative until WA instance has been upgraded
-        # https://twitter.com/pintman/status/1371909456762638336
         num = self.number_of_clients('main')
         if num > 0:
             await self.announce(bot, room, num)
@@ -48,7 +52,7 @@ class MatrixModule(BotModule):
             f"{num_clients} Entitäten sind im " +
                 "<a href='https://virtuallab.das-labor.org'>virtuellen " +
                 "Labor</a>", 
-            f"{num_clients} Entitäten sind im virtuellen Labor")
+            f"{num_clients} Entitäten sind im virtuellen Labor")            
 
     def number_of_clients(self, room, retries=5):
         'Return the numnber of clients in the given room inside a WA instance.'
