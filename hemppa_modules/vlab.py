@@ -16,6 +16,7 @@ class MatrixModule(BotModule):
     def __init__(self, name):
         super().__init__(name)
         self.last_intrinsic_announcement = None
+        self.logger.info('vlab Bot inited')
         
     async def matrix_message(self, bot, room, event):
         num = self.number_of_clients('main')
