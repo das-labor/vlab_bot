@@ -27,8 +27,6 @@ class MatrixModule(BotModule):
 
     async def matrix_poll(self, bot, pollcount):
         'called every 10 seconds'
-        # TODO remove 'True' if WA instance has been upgraded
-        # https://twitter.com/pintman/status/1371909456762638336
         if self.last_intrinsic_announcement is not None and \
             (time.time() - self.last_intrinsic_announcement) < ANNOUNCEMENT_INTERVAL:
             return
@@ -37,13 +35,9 @@ class MatrixModule(BotModule):
         if room is None:
             return
 
-        # try to fetch metric
-        num = 0
-        tries = 5
-        while num==0 and tries > 0:
-            num = self.number_of_clients('main')
-            tries -= 1
-
+        # TODO num will be negative until WA instance has been upgraded
+        # https://twitter.com/pintman/status/1371909456762638336
+        num = self.number_of_clients('main')
         if num > 0:
             await self.announce(bot, room, num)
             self.last_intrinsic_announcement = time.time()
@@ -51,23 +45,27 @@ class MatrixModule(BotModule):
     async def announce(self, bot, room, num_clients):
         await bot.send_html(
             room,
-            f"{num_clients} Entitäten sind im <a href='https://virtuallab.das-labor.org'>virtuellen Labor</a>", 
+            f"{num_clients} Entitäten sind im " +
+                "<a href='https://virtuallab.das-labor.org'>virtuellen " +
+                "Labor</a>", 
             f"{num_clients} Entitäten sind im virtuellen Labor")
 
-    def number_of_clients(self, room):
+    def number_of_clients(self, room, retries=5):
         'Return the numnber of clients in the given room inside a WA instance.'
-        with urlopen(METRICS_URL) as f:
-            lines = f.readlines()
 
-        for line in lines:
-            line_str = line.decode()
-            if NUM_CLIENTS_MARKER in line_str and \
-                ROOM_PREFIX+room in line_str:
+        for _ in range(retries):        
+            with urlopen(METRICS_URL) as f:
+                lines = f.readlines()
 
-                # line of format
-                # workadventure_nb_clients_per_room{room="_/global/das-labor.github.io/workadv_das-labor/main.json"} 20
-                number_of_clients_online = int(line_str.split('} ')[1])
-                return number_of_clients_online
+            for line in lines:
+                line_str = line.decode()
+                if NUM_CLIENTS_MARKER in line_str and \
+                    ROOM_PREFIX+room in line_str:
+
+                    # line of format
+                    # workadventure_nb_clients_per_room{room="_/global/das-labor.github.io/workadv_das-labor/main.json"} 20
+                    number_of_clients_online = int(line_str.split('} ')[1])
+                    return number_of_clients_online
 
         # no room found
         self.logger.warn(f'Room {room} not found in metrics')
