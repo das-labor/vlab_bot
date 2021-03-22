@@ -4,14 +4,19 @@ from modules.common.module import BotModule
 from urllib.request import urlopen
 import logging
 import os 
+import time
 
 NUM_CLIENTS_MARKER = 'workadventure_nb_clients_per_room'
 METRICS_URL = "https://pusher.wa.binary-kitchen.de/metrics"
 ROOM_PREFIX = "_/global/das-labor.github.io/workadv_das-labor/"
 MAIN_ROOM_ID = os.environ["VLAB_MAIN_ROOM_ID"]
-POLL_INTERVAL = 200 # *10 seconds
+ANNOUNCEMENT_INTERVAL = 60 * 30 # seconds
 
 class MatrixModule(BotModule):
+    def __init__(self, name):
+        super().__init__(name)
+        self.last_intrinsic_announcement = None
+        
     async def matrix_message(self, bot, room, event):
         num = self.number_of_clients('main')
         await self.announce(bot, room, num)
@@ -23,7 +28,8 @@ class MatrixModule(BotModule):
         'called every 10 seconds'
         # TODO remove 'True' if WA instance has been upgraded
         # https://twitter.com/pintman/status/1371909456762638336
-        if True or pollcount % POLL_INTERVAL != 0:
+        if self.last_intrinsic_announcement is not None and \
+            (time.time() - self.last_intrinsic_announcement) < ANNOUNCEMENT_INTERVAL:
             return
 
         room = bot.get_room_by_id(MAIN_ROOM_ID)
@@ -33,6 +39,7 @@ class MatrixModule(BotModule):
         num = self.number_of_clients('main')
         if num > 0:
             await self.announce(bot, room, num)
+            self.last_intrinsic_announcement = time.time()
 
     async def announce(self, bot, room, num_clients):
         await bot.send_html(
