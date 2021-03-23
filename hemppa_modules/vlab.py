@@ -2,6 +2,7 @@
 
 from modules.common.module import BotModule
 from urllib.request import urlopen
+from urllib.error import URLError, HTTPError
 import logging
 import os 
 import time
@@ -20,6 +21,10 @@ class MatrixModule(BotModule):
         
     async def matrix_message(self, bot, room, event):
         num = self.number_of_clients('main')
+        if num is None:
+            await bot.send_text(room, 'Ich konnte die Anzahl der Entitäten leider nicht ermitteln. :(')
+            return
+
         await self.announce(bot, room, num)
 
         # TODO num will be negative until WA instance has been upgraded
@@ -42,7 +47,7 @@ class MatrixModule(BotModule):
             return
 
         num = self.number_of_clients('main')
-        if num > 0:
+        if num is not None and num > 0:
             await self.announce(bot, room, num)
             self.last_intrinsic_announcement = time.time()
 
@@ -55,22 +60,30 @@ class MatrixModule(BotModule):
             f"{num_clients} Entitäten sind im virtuellen Labor")            
 
     def number_of_clients(self, room, retries=5):
-        'Return the numnber of clients in the given room inside a WA instance.'
+        'Return the numnber of clients in the given room inside a WA instance. Will return None on error.'
 
-        for _ in range(retries):        
-            with urlopen(METRICS_URL) as f:
-                lines = f.readlines()
+        for _ in range(retries):  
+            # retrieve metrics and handle errors
+            # https://docs.python.org/3/howto/urllib2.html
+            try:
+                response = urlopen(METRICS_URL)
+                lines = response.readlines()
+            except HTTPError as e:
+                self.logger.error(f'The server couldnt fulfill the request. {e.code}')
+            except URLError as e:
+                self.logger.error(f'We failed to reach a server. {e.reason}')
+            else:
+                # no errors
+                for line in lines:
+                    line_str = line.decode()
+                    if NUM_CLIENTS_MARKER in line_str and \
+                        ROOM_PREFIX+room in line_str:
 
-            for line in lines:
-                line_str = line.decode()
-                if NUM_CLIENTS_MARKER in line_str and \
-                    ROOM_PREFIX+room in line_str:
-
-                    # line of format
-                    # workadventure_nb_clients_per_room{room="_/global/das-labor.github.io/workadv_das-labor/main.json"} 20
-                    number_of_clients_online = int(line_str.split('} ')[1])
-                    return number_of_clients_online
+                        # line of format
+                        # workadventure_nb_clients_per_room{room="_/global/das-labor.github.io/workadv_das-labor/main.json"} 20
+                        number_of_clients_online = int(line_str.split('} ')[1])
+                        return number_of_clients_online
 
         # no room found
-        self.logger.warn(f'Room {room} not found in metrics')
+        self.logger.warn(f'Room {room} not found in metrics after {retries} retries.')
         return None
