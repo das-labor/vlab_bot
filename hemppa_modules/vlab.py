@@ -11,7 +11,7 @@ NUM_CLIENTS_MARKER = 'workadventure_nb_clients_per_room'
 METRICS_URL = "https://pusher.wa.binary-kitchen.de/metrics"
 ROOM_PREFIX = "_/global/das-labor.github.io/workadv_das-labor/"
 MAIN_ROOM_ID = os.environ["VLAB_MAIN_ROOM_ID"]
-ANNOUNCEMENT_INTERVAL = 60 * 30 # seconds
+ANNOUNCEMENT_INTERVAL = 60 * 60 # seconds
 
 class MatrixModule(BotModule):
     def __init__(self, name):
