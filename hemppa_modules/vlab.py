@@ -34,7 +34,7 @@ class MatrixModule(BotModule):
                 "Wenn die Zahl negativ ist, liegt dies an einem bekannten Problem auf der Instanz. Hier hilft nur abwarten. Techniker ist informiert :)")
 
     def help(self):
-        return "Ein Bot für das virtuelle Labor"
+        return "Wieviele Entitäten sind im virtuellen Labor?"
 
     async def matrix_poll(self, bot, pollcount):
         'called every 10 seconds'
