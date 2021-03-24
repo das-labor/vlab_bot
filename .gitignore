@@ -4,7 +4,3 @@ venv/
 __pycache__/
 hemppa.git
 
-config.py
-vlab_bot.log
-vlab_bot.db
-vlab_bot.db.bak
