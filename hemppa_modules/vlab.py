@@ -12,15 +12,17 @@ METRICS_URL = "https://pusher.wa.binary-kitchen.de/metrics"
 ROOM_PREFIX = "_/global/das-labor.github.io/workadv_das-labor/"
 MAIN_ROOM_ID = os.environ["VLAB_MAIN_ROOM_ID"]
 ANNOUNCEMENT_INTERVAL = int(os.environ["VLAB_ANNOUNCEMENT_INTERVAL"]) # seconds
+WA_ROOM = 'main' # .json
 
 class MatrixModule(BotModule):
     def __init__(self, name):
         super().__init__(name)
         self.last_intrinsic_announcement = None
         self.logger.info('vlab Bot inited')
+        self.last_num_clients_seen = self.number_of_clients(WA_ROOM)
         
     async def matrix_message(self, bot, room, event):
-        num = self.number_of_clients('main')
+        num = self.number_of_clients(WA_ROOM)
         if num is None:
             await bot.send_text(room, 'Ich konnte die Anzahl der Entitäten leider nicht ermitteln. :(')
             return
@@ -47,8 +49,9 @@ class MatrixModule(BotModule):
             return
 
         num = self.number_of_clients('main')
-        if num is not None and num > 0:
+        if num is not None and num > 0 and num != self.last_num_clients_seen:
             await self.announce(bot, room, num)
+            self.last_num_clients_seen = num
             self.last_intrinsic_announcement = time.time()
 
     async def announce(self, bot, room, num_clients):
