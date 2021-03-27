@@ -24,11 +24,13 @@ class MatrixModule(BotModule):
                 js = json.load(resp)
 
             answer = "Mal schauen, was ich im Wiki so gefunden habe.\n"
-            for result in js['query']['search']:
+            results = js['query']['search']
+            for result in results:
                 answer += WIKI_BASE_URL + "/w/" + \
                     urllib.parse.quote(result["title"]) + "\n"
 
-            await bot.send_text(room, answer)
+            if len(results) > 0:
+                await bot.send_text(room, answer)
         
     def help(self):
         return "Verlinke auf das Labor-Wiki."
