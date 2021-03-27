@@ -52,12 +52,13 @@ class MatrixModule(BotModule):
             self.last_intrinsic_announcement = time.time()
 
     async def announce(self, bot, room, num_clients):
+        ents_are = "Entität ist" if num_clients==1 else "Entitäten sind"
         await bot.send_html(
             room,
-            f"{num_clients} Entitäten sind im " +
+            f"{num_clients} {ents_are} im " +
                 "<a href='https://virtuallab.das-labor.org'>virtuellen " +
                 "Labor</a>", 
-            f"{num_clients} Entitäten sind im virtuellen Labor")            
+            f"{num_clients} {ents_are} sind im virtuellen Labor")            
 
     def number_of_clients(self, room, retries=5):
         'Return the numnber of clients in the given room inside a WA instance. Will return None on error.'
