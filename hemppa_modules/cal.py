@@ -7,7 +7,7 @@ CAL_RSS_URL ="https://www.das-labor.org/termine.rss"
 class MatrixModule(BotModule):
     async def matrix_message(self, bot, room, event):
         events = ''
-        for line in urlopen(CAL_RSS_URL).readlines():
+        for line in urlopen(CAL_RSS_URL, timeout=5).readlines():
             lined = line.decode()
             if '<description>' in lined and '(' in lined:
                 event_date, title = self.extract(lined)

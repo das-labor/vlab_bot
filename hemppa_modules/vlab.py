@@ -67,7 +67,7 @@ class MatrixModule(BotModule):
             # retrieve metrics and handle errors
             # https://docs.python.org/3/howto/urllib2.html
             try:
-                response = urlopen(METRICS_URL)
+                response = urlopen(METRICS_URL, timeout=5)
                 lines = response.readlines()
             except HTTPError as e:
                 self.logger.error(f'The server couldnt fulfill the request. {e.code}')

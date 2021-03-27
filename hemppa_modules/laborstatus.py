@@ -8,7 +8,7 @@ LAB_STATE_URL = "https://www.das-labor.org/status/LAB_STATE.png"
 
 class MatrixModule(BotModule):
     async def matrix_message(self, bot, room, event):
-        with urlopen(LABOR_STATUS_URL) as response:
+        with urlopen(LABOR_STATUS_URL, timeout=5) as response:
             status = response.read().decode()
         
         await bot.send_text(room, f'Laborstatus: {status}')
