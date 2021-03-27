@@ -1,6 +1,5 @@
 from modules.common.module import BotModule
 from urllib.request import urlopen
-import os
 import datetime
 
 CAL_RSS_URL ="https://www.das-labor.org/termine.rss"
