@@ -29,8 +29,10 @@ class MatrixModule(BotModule):
                 answer += WIKI_BASE_URL + "/w/" + \
                     urllib.parse.quote(result["title"]) + "\n"
 
-            if len(results) > 0:
-                await bot.send_text(room, answer)
+            if len(results) == 0:
+                answer = 'Ich habe nichts gefunden. Sorry. ☹️'
+
+            await bot.send_text(room, answer)
         
     def help(self):
         return "Durchsuche das Labor-Wiki."
