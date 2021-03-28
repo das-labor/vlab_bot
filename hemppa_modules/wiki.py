@@ -30,7 +30,10 @@ class MatrixModule(BotModule):
                     urllib.parse.quote(result["title"]) + "\n"
 
             if len(results) == 0:
-                answer = 'Ich habe nichts gefunden. Sorry. ☹️'
+                answer = 'Ich habe nichts gefunden. Sorry. ☹️ ' + \
+                    'Ich habe mich aber auch nicht doll angestrengt. Schau ' + \
+                    'selbst einmal nach.\n' + \
+                    f'{WIKI_BASE_URL}?search=' + query
 
             await bot.send_text(room, answer)
         
