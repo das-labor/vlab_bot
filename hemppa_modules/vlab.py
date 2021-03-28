@@ -24,7 +24,8 @@ class MatrixModule(BotModule):
     async def matrix_message(self, bot, room, event):
         num = self.number_of_clients(WA_ROOM)
         if num is None:
-            await bot.send_text(room, 'Ich konnte die Anzahl der Entitäten leider nicht ermitteln. :(')
+            await bot.send_text(room, 
+                f'Ich konnte die Anzahl der Entitäten leider nicht ermitteln. :(\n{METRICS_URL}')
             return
 
         await self.announce(bot, room, num)
