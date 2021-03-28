@@ -20,6 +20,7 @@ class MatrixModule(BotModule):
         self.last_intrinsic_announcement = None
         self.logger.info('vlab Bot inited')
         self.last_num_clients_seen = self.number_of_clients(WA_ROOM)
+        self.poll_interval = 6  # * 10 seconds
         
     async def matrix_message(self, bot, room, event):
         num = self.number_of_clients(WA_ROOM)
@@ -41,8 +42,8 @@ class MatrixModule(BotModule):
 
     async def matrix_poll(self, bot, pollcount):
         'called every 10 seconds'
-        if self.last_intrinsic_announcement is not None and \
-            (time.time() - self.last_intrinsic_announcement) < ANNOUNCEMENT_INTERVAL:
+
+        if pollcount % self.poll_interval != 0:
             return
 
         room = bot.get_room_by_id(MAIN_ROOM_ID)
@@ -50,10 +51,17 @@ class MatrixModule(BotModule):
             return
 
         num = self.number_of_clients('main')
-        if num is not None and num > 0 and num != self.last_num_clients_seen:
-            await self.announce(bot, room, num)
-            self.last_num_clients_seen = num
-            self.last_intrinsic_announcement = time.time()
+        if num is None or num==0 or num==self.last_num_clients_seen:
+            return
+
+        time_delta_last_announcement = time.time() - self.last_intrinsic_announcement
+        if self.last_intrinsic_announcement is not None and \
+            time_delta_last_announcement < ANNOUNCEMENT_INTERVAL:
+            return
+
+        await self.announce(bot, room, num)
+        self.last_num_clients_seen = num
+        self.last_intrinsic_announcement = time.time()
 
     async def announce(self, bot, room, num_clients):
         ents_are = "Entität ist" if num_clients==1 else "Entitäten sind"
