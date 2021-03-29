@@ -5,7 +5,6 @@ import json
 import os
 import sqlite3
 
-FRAB_URL = os.environ["FRAB_URL"]
 MAIN_ROOM_ID = os.environ["VLAB_MAIN_ROOM_ID"]
 
 
@@ -20,48 +19,86 @@ class MatrixModule(BotModule):
 
     def initdb(self):
         with self.dbconn:
-            self.dbconn.execute('''
+            self.dbconn.executescript('''
             CREATE TABLE IF NOT EXISTS announcements (
                 date_time DATE NOT NULL DEFAULT (datetime('now','localtime')),
                 url TEXT NOT NULL,
                 roomid TEXT,
                 PRIMARY KEY (url)
+            );
+            CREATE TABLE IF NOT EXISTS subscriptions (
+                url TEXT PRIMARY KEY
             )
             ''')
             self.dbconn.commit()
 
     def remember_announcement(self, url, roomid):
         query = 'INSERT INTO announcements (url,roomid) VALUES (?,?)'
-        with self.dbconn:            
-            self.dbconn.execute(query, (url,roomid))
+        self._query(query, (url, roomid))
+
+    def add_subscription(self, url):
+        query = 'INSERT INTO subscriptions (url) VALUES (?)'
+        self._query(query, (url,))
+
+    def delete_subscription(self, url):
+        query = 'DELETE FROM subscriptions WHERE url=?'
+        self._query(query, (url,))
+
+    def read_subscriptions(self):
+        return [row[0] for row in self._query(
+            "SELECT url FROM subscriptions"
+        )]
+
+    def _query(self, query, params=[]):
+        with self.dbconn:
+            result = self.dbconn.execute(query, params)
             self.dbconn.commit()
+            return list(result)
 
     def already_sent(self, url):
         query = 'SELECT url FROM announcements WHERE url=?'
-        with self.dbconn:
-            c = self.dbconn.cursor()
-            c.execute(query, (url,))
-            if c.fetchone():
-                return True
-            else:
-                return False
-            c.close()
+        rows = self._query(query, (url,))
+        return len(rows)>0
 
-    def _read_frab(self):
-        with urlopen(FRAB_URL, timeout=5) as resp:
+    def _read_frab(self, url):
+        with urlopen(url, timeout=5) as resp:
             js = json.load(resp)
 
         return js
 
     async def matrix_message(self, bot, room, event):
-        msg = "Ich schaue regelmäßig in den Fahrplan und erinnere " + \
-            f"{self.look_minutes_in_future} Minuten vor Beginn " + \
-            "einer Veranstaltung."
+        self.logger.debug(f'processing {event.body}')
+        args = event.body.split()
+
+        if len(args) == 1:
+            msg = "Ich schaue regelmäßig in den Fahrplan und erinnere " + \
+                f"{self.look_minutes_in_future} Minuten vor Beginn " + \
+                "einer Veranstaltung."
+
+        elif len(args)== 2:
+            cmd = args[1]
+            if cmd=='ls':
+                msg = f'Subscriptions:\n'
+                for row in self._query('SELECT url FROM subscriptions'):
+                    msg += row[0]+'\n'
+
+        elif len(args) == 3:
+            bot.must_be_owner(event)
+            cmd, param = args[1], args[2]
+            if cmd=='add':
+                msg = f'adding {param}'
+                self.add_subscription(param)
+            elif cmd=='rm':
+                msg = f'removing {param}'
+                self.delete_subscription(param)
+        else:
+            return
 
         await bot.send_text(room, msg)
 
-    async def check_events(self, bot, room):
-        frab = self._read_frab()
+    async def check_events(self, bot, room, url):
+        self.logger.debug(f'checking url {url}')
+        frab = self._read_frab(url)
         for day in frab['schedule']['conference']['days']:
             for conf_room in day['rooms']:
                 for room_ev in day['rooms'][conf_room]:
@@ -100,7 +137,8 @@ class MatrixModule(BotModule):
         if room is None:
             return
 
-        await self.check_events(bot, room)
+        for url in self.read_subscriptions():
+            await self.check_events(bot, room, url)
 
     def help(self):
         return "Ankündigung von Events aus dem Fahrplan"
