@@ -10,8 +10,12 @@ class MatrixModule(BotModule):
     async def matrix_message(self, bot, room, event):
         with urlopen(LABOR_STATUS_URL, timeout=5) as response:
             status = response.read().decode()
-        
-        await bot.send_text(room, f'Laborstatus: {status}')
+
+        if status=='OPEN': icon = "🔓" 
+        elif status=='CLOSED': icon = "🔒"
+        else: icon = '?'
+
+        await bot.send_text(room, f"Laborstatus {status} {icon}")
         
     def help(self):
         return "Ist das Labor geöffnet?"
