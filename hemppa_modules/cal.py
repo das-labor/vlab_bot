@@ -6,7 +6,7 @@ CAL_RSS_URL ="https://www.das-labor.org/termine.rss"
 
 class MatrixModule(BotModule):
     async def matrix_message(self, bot, room, event):
-        events = ''
+        events = '📅 Termine der nächsten Tage:\n'
         for line in urlopen(CAL_RSS_URL, timeout=5).readlines():
             lined = line.decode()
             if '<description>' in lined and '(' in lined:
