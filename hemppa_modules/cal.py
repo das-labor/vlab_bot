@@ -19,7 +19,7 @@ class MatrixModule(BotModule):
 
         for date, title, link in self.next_events():
             evdat = date.strftime('%Y-%m-%d %H:%M')
-            msg += f'{evdat} {title}\n {link}\n'
+            msg += f'{evdat} {title}\n'
 
         msg += 'https://wiki.das-labor.org/w/Kalender'
         await bot.send_text(room, msg)
