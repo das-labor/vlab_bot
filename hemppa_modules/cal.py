@@ -33,7 +33,7 @@ class MatrixModule(BotModule):
         # now  |  event date | next poll interval
         #
         time_until_event = event_date - datetime.datetime.now()
-        if time_until_event.total_seconds() < self.poll_interval * 10:
+        if 0 < time_until_event.total_seconds() < self.poll_interval * 10:
             room = bot.get_room_by_id(self.main_room)
             if room is None:
                 return
