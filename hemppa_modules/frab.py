@@ -6,7 +6,6 @@ import os
 import sqlite3
 
 FRAB_URL = os.environ["FRAB_URL"]
-# "https://pretalx.c3voc.de/divoc-reboot-to-respawn-2021/schedule/export/schedule.json"
 MAIN_ROOM_ID = os.environ["VLAB_MAIN_ROOM_ID"]
 
 
