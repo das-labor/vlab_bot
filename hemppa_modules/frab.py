@@ -141,5 +141,5 @@ class MatrixModule(BotModule):
             await self.check_events(bot, room, url)
 
     def help(self):
-        return "Ankündigung von Events aus dem Fahrplan (add, rm, ls)"
+        return "📅 Ankündigung von Events aus dem Fahrplan (add, rm, ls)"
 

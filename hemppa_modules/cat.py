@@ -26,4 +26,4 @@ class MatrixModule(BotModule):
             '''
 
     def help(self):
-        return "Cat content."
+        return "🐱 Cat content."

@@ -18,4 +18,4 @@ class MatrixModule(BotModule):
         await bot.send_text(room, msg)
 
     def help(self):
-        return 'Hilfe zum vLab Bot.'
+        return '📝 Hilfe zum vLab Bot.'

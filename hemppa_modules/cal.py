@@ -59,7 +59,7 @@ class MatrixModule(BotModule):
                 return events
 
     def help(self):
-        return "Die nächsten Labor-Termine"
+        return "📅 Die nächsten Labor-Termine"
 
     def extract(self, date_title_line):
         'Extract date and title of event from string'

@@ -38,4 +38,4 @@ class MatrixModule(BotModule):
             await bot.send_text(room, answer)
         
     def help(self):
-        return "Durchsuche das Labor-Wiki."
+        return "🔎 Durchsuche das Labor-Wiki."

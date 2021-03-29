@@ -17,4 +17,4 @@ class MatrixModule(BotModule):
         await bot.send_text(room, f"Laborstatus {status} {icon}")
         
     def help(self):
-        return "Ist das Labor geöffnet?"
+        return "🔒 Ist das Labor geöffnet?"
