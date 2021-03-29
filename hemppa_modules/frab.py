@@ -124,7 +124,6 @@ class MatrixModule(BotModule):
                         await bot.send_text(room, 
                             f'{re_title.upper()} startet in {int(minutes_left)} Minuten \n{re_url}')
                         self.remember_announcement(re_url, room.room_id)
-                        return
 
         self.logger.debug('finished event check')
 
