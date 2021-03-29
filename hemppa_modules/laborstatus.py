@@ -4,7 +4,6 @@ from modules.common.module import BotModule
 from urllib.request import urlopen
 
 LABOR_STATUS_URL = "https://das-labor.org/status/status.php?status"
-LAB_STATE_URL = "https://www.das-labor.org/status/LAB_STATE.png"
 
 class MatrixModule(BotModule):
     async def matrix_message(self, bot, room, event):
