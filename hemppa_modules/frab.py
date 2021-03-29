@@ -114,7 +114,7 @@ class MatrixModule(BotModule):
                     # remove time zone in order to allow time substraction
                     evt_time = evt_time.replace(tzinfo=None)
                     time_left = evt_time - datetime.datetime.now()
-                    minutes_left = time_left.seconds / 60
+                    minutes_left = time_left.total_seconds() / 60
 
                     if minutes_left < self.look_minutes_in_future and \
                         not self.already_sent(url):
