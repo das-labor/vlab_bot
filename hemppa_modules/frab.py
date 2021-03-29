@@ -15,6 +15,7 @@ class MatrixModule(BotModule):
         self.look_minutes_in_future = 60 # minutes
         self.main_room = MAIN_ROOM_ID
         self.dbconn = sqlite3.connect('frab.db')
+        self.dbconn.row_factory = sqlite3.Row
         self.initdb()
 
     def initdb(self):
@@ -80,7 +81,7 @@ class MatrixModule(BotModule):
             if cmd=='ls':
                 msg = f'Subscriptions, bei denen ich regelmäßig vorbeischaue:\n'
                 for row in self._query('SELECT url FROM subscriptions'):
-                    msg += f'👁️ {row[0]}\n'
+                    msg += f'👁️ {row["url"]}\n'
 
         elif len(args) == 3:
             bot.must_be_owner(event)
