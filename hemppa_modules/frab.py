@@ -15,7 +15,7 @@ class MatrixModule(BotModule):
         self.poll_interval = 6 * 30  # * 10 seconds
         self.look_minutes_in_future = 60 # minutes
         self.main_room = MAIN_ROOM_ID
-        self.dbconn = sqlite3.connect('divoc.db')
+        self.dbconn = sqlite3.connect('frab.db')
         self.initdb()
 
     def initdb(self):
