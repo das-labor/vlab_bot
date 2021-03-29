@@ -78,9 +78,9 @@ class MatrixModule(BotModule):
         elif len(args)== 2:
             cmd = args[1]
             if cmd=='ls':
-                msg = f'Subscriptions:\n'
+                msg = f'Subscriptions, bei denen ich regelmäßig vorbeischaue:\n'
                 for row in self._query('SELECT url FROM subscriptions'):
-                    msg += row[0]+'\n'
+                    msg += f'👁️ {row[0]}\n'
 
         elif len(args) == 3:
             bot.must_be_owner(event)
