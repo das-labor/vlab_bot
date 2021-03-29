@@ -96,9 +96,9 @@ class MatrixModule(BotModule):
 
         await bot.send_text(room, msg)
 
-    async def check_events(self, bot, room, url):
-        self.logger.debug(f'checking url {url}')
-        frab = self._read_frab(url)
+    async def check_events(self, bot, room, frab_url):
+        self.logger.debug(f'checking url {frab_url}')
+        frab = self._read_frab(frab_url)
         for day in frab['schedule']['conference']['days']:
             for conf_room in day['rooms']:
                 for room_ev in day['rooms'][conf_room]:
@@ -117,7 +117,7 @@ class MatrixModule(BotModule):
                     minutes_left = time_left.total_seconds() / 60
 
                     if minutes_left < self.look_minutes_in_future and \
-                        not self.already_sent(url):
+                        not self.already_sent(re_url):
 
                         self.logger.debug(f'sending annnouncement about {re_title} to {room.room_id}')
                         await bot.send_text(room, 
