@@ -38,7 +38,7 @@ class MatrixModule(BotModule):
             if room is None:
                 return
 
-            msg = f"Gleich: {title} ({event_date})\n{link}"
+            msg = f"⏰ Gleich: {title} ({event_date})\n{link}"
             self.logger.debug(f'notify event: {msg}')
             await bot.send_text(room, msg)
 
