@@ -1,41 +1,48 @@
 from modules.common.module import BotModule
 from urllib.request import urlopen
 import datetime
+import json
+import xml.etree.ElementTree as ET
 
 CAL_RSS_URL ="https://www.das-labor.org/termine.rss"
-MAX_NUMBER_EVENTS = 5
+MAX_NUMBER_EVENTS = 3
 
 class MatrixModule(BotModule):
     async def matrix_message(self, bot, room, event):
-        events = '📅 Termine der nächsten Tage:\n'
-        num_events = 0
-        for line in urlopen(CAL_RSS_URL, timeout=5).readlines():
-            lined = line.decode()
-            if '<description>' in lined and '(' in lined:
-                event_date, title = self.extract(lined)
-                evdat = event_date.strftime('%Y-%m-%d %H:%M')
-                events += f'{evdat} {title}\n'
-                today = datetime.datetime.now()
-                past = today - datetime.timedelta(days=-10)
-                num_events += 1
+        msg = '📅 Termine der nächsten Tage:\n'
 
-            if num_events >= MAX_NUMBER_EVENTS:
-                break
+        for date, title, link in self.next_events():
+            msg += f'{date} {title}\n {link}\n'
 
-        events += 'https://wiki.das-labor.org/w/Kalender'
-        await bot.send_text(room, events)
-        
+        msg += 'https://wiki.das-labor.org/w/Kalender'
+        await bot.send_text(room, msg)
+
+    def next_events(self, num=3):
+        'return the next num events (date, title, link).'
+
+        tree = ET.parse(urlopen(CAL_RSS_URL, timeout=5))
+        root = tree.getroot()
+        events = []
+        for item in root.iter('item'):
+            it_desc = item.find('description').text
+            it_link = item.find('link').text
+
+            event_date, title = self.extract(it_desc)
+            evdat = event_date.strftime('%Y-%m-%d %H:%M')
+            events.append( (evdat, title, it_link))
+
+            if len(events) >= MAX_NUMBER_EVENTS:
+                return events
+
     def help(self):
         return "Die nächsten Labor-Termine"
 
     def extract(self, date_title_line):
         'Extract date and title of event from string'
 
-        # example: <description>31.03.2021 (Mi) 19:00 - Workshop Labor-Selbstverständnis VI (Online Event)</description>
+        # example: 31.03.2021 (Mi) 19:00 - Workshop Labor-Selbstverständnis VI (Online Event)
 
-        date_title = date_title_line.split('<description>')[1].  \
-            split('</description>')[0]. \
-            split('-')
+        date_title = date_title_line.split('-')
         title = '-'.join(date_title[1:])
         # expecting something like: 31.03.2021 (Mi) 19:00
         date = date_title[0].split('(')[0] + date_title[0].split(')')[1]
