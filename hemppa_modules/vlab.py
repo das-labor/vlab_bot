@@ -54,9 +54,8 @@ class MatrixModule(BotModule):
         if num is None or num==0 or num==self.last_num_clients_seen:
             return
 
-        time_delta_last_announcement = time.time() - self.last_intrinsic_announcement
         if self.last_intrinsic_announcement is not None and \
-            time_delta_last_announcement < ANNOUNCEMENT_INTERVAL:
+            time.time() - self.last_intrinsic_announcement < ANNOUNCEMENT_INTERVAL:
             return
 
         await self.announce(bot, room, num)
