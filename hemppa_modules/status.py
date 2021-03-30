@@ -14,7 +14,7 @@ class MatrixModule(BotModule):
         elif status=='CLOSED': icon = "🔒"
         else: icon = '?'
 
-        await bot.send_text(room, f"Laborstatus {status} {icon}")
+        await bot.send_text(room, f"Geöffnet? {status} {icon}")
         
     def help(self):
         return "🔒 Ist das Labor geöffnet?"
