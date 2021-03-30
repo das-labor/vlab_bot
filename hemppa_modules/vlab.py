@@ -8,7 +8,7 @@ import os
 import time
 
 NUM_CLIENTS_MARKER = 'workadventure_nb_clients_per_room'
-METRICS_URL = "https://pusher.wa.binary-kitchen.de/metrics"
+METRICS_URL = os.environ["VLAB_METRICS_URL"]
 ROOM_PREFIX = "_/global/das-labor.github.io/workadv_das-labor/"
 MAIN_ROOM_ID = os.environ["VLAB_MAIN_ROOM_ID"]
 ANNOUNCEMENT_INTERVAL = int(os.environ["VLAB_ANNOUNCEMENT_INTERVAL"]) # seconds
