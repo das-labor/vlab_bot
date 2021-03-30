@@ -50,7 +50,10 @@ class MatrixModule(BotModule):
             "SELECT url FROM subscriptions"
         )]
 
-    def _query(self, query, params=[]):
+    def _query(self, query, params=None):
+        # https://docs.python-guide.org/writing/gotchas/
+        if params is None: params=[]
+
         with self.dbconn:
             result = self.dbconn.execute(query, params)
             self.dbconn.commit()
