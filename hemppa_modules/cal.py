@@ -134,6 +134,29 @@ class MatrixModule(BotModule):
 
         return events
 
+    # TODO better use labor_ical feed
+    # https://www.das-labor.org/termine.ics
+    # Entries are of the form
+    # 
+    # BEGIN:VEVENT
+    # SUMMARY:Chillout Friday (Online Event)
+    # URL:https://wiki.das-labor.org/w/Chillout_Friday#_01569f0490f65740e8510125131f1>
+    # UID:https://wiki.das-labor.org/w/Chillout_Friday#_01569f0490f65740e8510125131f1>
+    # DTSTART:20210604T190000
+    # DTSTAMP:20210325T185735
+    # SEQUENCE:34834
+    # END:VEVENT
+    #
+    # BEGIN:VEVENT
+    # SUMMARY:DiVOC: Reboot to Respawn (r2r)
+    # URL:https://wiki.das-labor.org/w/Veranstaltung/DiVOC:_Reboot_to_Respawn
+    # UID:https://wiki.das-labor.org/w/Veranstaltung/DiVOC:_Reboot_to_Respawn
+    # DTSTART:20210402T100000
+    # DTEND:20210405T181500
+    # DTSTAMP:20210331T162319
+    # SEQUENCE:34859
+    # END:VEVENT
+
     def _fetch_labor_rss(self, url):
         'fetch event from url and return list (date,title,link)'
         self.logger.debug(f'fetching labor events from {url}')
