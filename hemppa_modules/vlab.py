@@ -30,12 +30,6 @@ class MatrixModule(BotModule):
 
         await self.announce(bot, room, num)
 
-        # TODO num will be negative until WA instance has been upgraded
-        # https://twitter.com/pintman/status/1371909456762638336
-        if num < 0:
-            await bot.send_text(room, 
-                "Wenn die Zahl negativ ist, liegt dies an einem bekannten Problem auf der Instanz. Hier hilft nur abwarten. Techniker ist informiert :)")
-
     def help(self):
         return "🛸 Wieviele Entitäten sind im virtuellen Labor?"
 
