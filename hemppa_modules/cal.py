@@ -80,6 +80,7 @@ class MatrixModule(BotModule):
         if pollcount % self.poll_interval != 0:
             return
 
+        # TODO loop over all future events. maybe more than one till next poll
         event_date, title, link = self.next_events(num=1)[0]
         # now  |  event date | next poll interval
         #
