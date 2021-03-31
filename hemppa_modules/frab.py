@@ -122,7 +122,8 @@ class MatrixModule(BotModule):
 
     async def matrix_poll(self, bot, pollcount):
         'called every 10 seconds'
-
+        return
+        
         if pollcount % self.poll_interval != 0:
             return
 
