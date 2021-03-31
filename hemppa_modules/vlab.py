@@ -1,5 +1,3 @@
-# Bot module for https://github.com/vranki/hemppa
-
 from modules.common.module import BotModule
 from urllib.request import urlopen
 from urllib.error import URLError, HTTPError
@@ -13,6 +11,7 @@ ROOM_PREFIX = "_/global/das-labor.github.io/workadv_das-labor/"
 MAIN_ROOM_ID = os.environ["VLAB_MAIN_ROOM_ID"]
 ANNOUNCEMENT_INTERVAL = int(os.environ["VLAB_ANNOUNCEMENT_INTERVAL"]) # seconds
 WA_ROOM = 'main' # .json
+
 
 class MatrixModule(BotModule):
     def __init__(self, name):
