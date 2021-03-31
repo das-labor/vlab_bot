@@ -3,9 +3,47 @@ from urllib.request import urlopen
 import datetime
 import json
 import os
-import sqlite3
+from .db import Database, Config
 
 MAIN_ROOM_ID = os.environ["VLAB_MAIN_ROOM_ID"]
+
+class FrabDB(Database):
+    def init_tables(self):
+        with self.dbconn:
+            self.dbconn.executescript('''
+            CREATE TABLE IF NOT EXISTS frab_announcements (
+                date_time DATE NOT NULL DEFAULT (datetime('now','localtime')),
+                url TEXT NOT NULL,
+                roomid TEXT,
+                PRIMARY KEY (url)
+            );
+            CREATE TABLE IF NOT EXISTS frab_subscriptions (
+                url TEXT PRIMARY KEY
+            )
+            ''')
+            self.dbconn.commit()
+
+    def remember_announcement(self, url, roomid):
+        query = 'INSERT INTO frab_announcements (url,roomid) VALUES (?,?)'
+        self.db.query(query, (url, roomid))
+
+    def add_subscription(self, url):
+        query = 'INSERT INTO frab_subscriptions (url) VALUES (?)'
+        self.db.query(query, (url,))
+
+    def delete_subscription(self, url):
+        query = 'DELETE FROM frab_subscriptions WHERE url=?'
+        self.db.query(query, (url,))
+
+    def read_subscriptions(self):
+        return [row[0] for row in self.db.query(
+            "SELECT url FROM frab_subscriptions"
+        )]
+
+    def already_sent(self, url):
+        query = 'SELECT url FROM frab_announcements WHERE url=?'
+        rows = self.db.query(query, (url,))
+        return len(rows)>0
 
 
 class MatrixModule(BotModule):
@@ -14,55 +52,7 @@ class MatrixModule(BotModule):
         self.poll_interval = 6 * 30  # * 10 seconds
         self.look_minutes_in_future = 60 # minutes
         self.main_room = MAIN_ROOM_ID
-        self.dbconn = sqlite3.connect('frab.db')
-        self.dbconn.row_factory = sqlite3.Row
-        self.initdb()
-
-    def initdb(self):
-        with self.dbconn:
-            self.dbconn.executescript('''
-            CREATE TABLE IF NOT EXISTS announcements (
-                date_time DATE NOT NULL DEFAULT (datetime('now','localtime')),
-                url TEXT NOT NULL,
-                roomid TEXT,
-                PRIMARY KEY (url)
-            );
-            CREATE TABLE IF NOT EXISTS subscriptions (
-                url TEXT PRIMARY KEY
-            )
-            ''')
-            self.dbconn.commit()
-
-    def remember_announcement(self, url, roomid):
-        query = 'INSERT INTO announcements (url,roomid) VALUES (?,?)'
-        self._query(query, (url, roomid))
-
-    def add_subscription(self, url):
-        query = 'INSERT INTO subscriptions (url) VALUES (?)'
-        self._query(query, (url,))
-
-    def delete_subscription(self, url):
-        query = 'DELETE FROM subscriptions WHERE url=?'
-        self._query(query, (url,))
-
-    def read_subscriptions(self):
-        return [row[0] for row in self._query(
-            "SELECT url FROM subscriptions"
-        )]
-
-    def _query(self, query, params=None):
-        # https://docs.python-guide.org/writing/gotchas/
-        if params is None: params=[]
-
-        with self.dbconn:
-            result = self.dbconn.execute(query, params)
-            self.dbconn.commit()
-            return list(result)
-
-    def already_sent(self, url):
-        query = 'SELECT url FROM announcements WHERE url=?'
-        rows = self._query(query, (url,))
-        return len(rows)>0
+        self.db = FrabDB()
 
     def _read_frab(self, url):
         with urlopen(url, timeout=5) as resp:
@@ -83,7 +73,7 @@ class MatrixModule(BotModule):
             cmd = args[1]
             if cmd=='ls':
                 msg = f'Subscriptions, bei denen ich regelmäßig vorbeischaue:\n'
-                for row in self._query('SELECT url FROM subscriptions'):
+                for row in self.db.query('SELECT url FROM frab_subscriptions'):
                     msg += f'👁️ {row["url"]}\n'
 
         elif len(args) == 3:
@@ -91,10 +81,10 @@ class MatrixModule(BotModule):
             cmd, param = args[1], args[2]
             if cmd=='add':
                 msg = f'adding {param}'
-                self.add_subscription(param)
+                self.db.add_subscription(param)
             elif cmd=='rm':
                 msg = f'removing {param}'
-                self.delete_subscription(param)
+                self.db.delete_subscription(param)
         else:
             return
 
@@ -121,7 +111,7 @@ class MatrixModule(BotModule):
                     minutes_left = time_left.total_seconds() / 60
 
                     if minutes_left < self.look_minutes_in_future and \
-                        not self.already_sent(re_url):
+                        not self.db.already_sent(re_url):
 
                         self.logger.debug(f'sending annnouncement about {re_title} to {room.room_id}')
                         await bot.send_text(room, 
@@ -140,7 +130,7 @@ class MatrixModule(BotModule):
         if room is None:
             return
 
-        for url in self.read_subscriptions():
+        for url in self.db.read_subscriptions():
             await self.check_events(bot, room, url)
 
     def help(self):
