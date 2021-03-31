@@ -4,28 +4,75 @@ import datetime
 import json
 import xml.etree.ElementTree as ET
 import os
+from .db import Database
 
-CAL_RSS_URL ="https://www.das-labor.org/termine.rss"
+#CAL_RSS_URL ="https://www.das-labor.org/termine.rss"
 MAIN_ROOM_ID = os.environ["VLAB_MAIN_ROOM_ID"]
+
+class CalDB(Database):
+    def init_tables(self):
+        with self.dbconn:
+            self.dbconn.executescript('''
+            CREATE TABLE IF NOT EXISTS cal_subscription (
+                url TEXT PRIMARY KEY,
+                type TEXT,
+                FOREIGN KEY (type) REFERENCES cal_urltype(name)
+            );
+            CREATE TABLE IF NOT EXISTS cal_urltype (
+                name TEST PRIMARY KEY
+            );
+            INSERT OR IGNORE INTO cal_urltype(name) VALUES ('frab'),('labor_rss');
+            ''')
+            self.dbconn.commit()
+
+    def add_subscription(self, url, url_type):
+        query = 'INSERT INTO cal_subscription (url, type) VALUES (?,?)'
+        self.query(query, (url,url_type))
+
+    def delete_subscription(self, url):
+        query = 'DELETE FROM cal_subscription WHERE url=?'
+        self.query(query, (url,))
+
+    def read_subscriptions(self):
+        'Return a list of (url,type) of subscriptions.'
+        return [(row[0],row[1]) for row in self.query(
+            "SELECT url,type FROM cal_subscription"
+        )]
+
 
 class MatrixModule(BotModule):
     def __init__(self, name):
         super().__init__(name)
         self.poll_interval = 6 * 10 # * 10 seconds
         self.main_room = MAIN_ROOM_ID
+        self.db = CalDB()
 
     async def matrix_message(self, bot, room, event):
-        msg = '📅 Termine der nächsten Tage:\n'
-
         args = event.body.split()
-        if len(args)==1: num = 3
-        elif len(args)==2: num = int(args[1])
 
-        for date, title, link in self.next_events(num):
-            evdat = date.strftime('%Y-%m-%d %H:%M')
-            msg += f'{evdat} {title}\n'
+        if len(args)==1:
+            msg = '📅 Die nächsten Termine:\n'
+            for date, title, link in self.next_events(num=3):
+                evdat = date.strftime('%Y-%m-%d %H:%M')
+                msg += f'{evdat} {title}\n{link}\n'
 
-        msg += 'https://wiki.das-labor.org/w/Kalender'
+        if len(args)==2 and args[1]=='ls':
+            msg = "Hier schaue ich nach Terminen:\n"
+            for url, type in self.db.read_subscriptions():
+                msg += f'- {url} ({type}) \n'
+
+        if len(args)==4 and args[1]=='add':
+            bot.must_be_owner(event)
+            _cal, cmd, atype, url = args
+            self.db.add_subscription(url, atype)
+            msg = f'Added {url} of type {atype}'
+
+        if len(args)==3 and args[1]=='rm':
+            bot.must_be_owner(event)
+            url = args[2]
+            self.db.delete_subscription(url)
+            msg = f'Deleted subscription {url}'
+
         await bot.send_text(room, msg)
 
     async def matrix_poll(self, bot, pollcount):
@@ -48,29 +95,66 @@ class MatrixModule(BotModule):
 
     def next_events(self, num=3):
         'return the next num events (date, title, link) sorted by date.'
-
-        tree = ET.parse(urlopen(CAL_RSS_URL, timeout=5))
-        root = tree.getroot()
         events = []
-        now = datetime.datetime.now()
-        for item in root.iter('item'):
-            it_desc = item.find('description').text
-            it_link = item.find('link').text
-
-            event_date, title = self.extract(it_desc)
-            # only collect future events
-            if event_date > now:
-                events.append( (event_date, title, it_link))
+        for url,atype in self.db.read_subscriptions():
+            if atype == 'labor_rss': events += self._fetch_labor_rss(url)
+            elif atype == 'frab': events += self._fetch_frab(url)
+            else:
+                self.logger.warn(f'Type unknown {atype} {url}')
 
         # sort events by date
         events_sorted = sorted(events, key=lambda d_t_l: d_t_l[0])
         return events_sorted[:num]
 
-    def help(self):
-        return "📅 Die nächsten Labor-Termine"
+    def _fetch_frab(self, frab_url):
+        'fetch event from frab_url and return list (date,title,link)'
+        self.logger.debug(f'fetching frab events from {frab_url}')
+        events = []
+        with urlopen(frab_url, timeout=5) as resp:
+            frab = json.load(resp)
 
-    def extract(self, date_title_line):
-        'Extract date and title of event from string'
+        for day in frab['schedule']['conference']['days']:
+            for conf_room in day['rooms']:
+                for room_ev in day['rooms'][conf_room]:
+                    if 'date' not in room_ev or \
+                        'title' not in room_ev or \
+                        'url' not in room_ev:
+                        continue
+
+                    re_title, re_url = room_ev['title'], room_ev['url']
+                    re_date = room_ev['date']
+
+                    evt_time = datetime.datetime.fromisoformat(re_date)
+                    # remove time zone in order to allow time substraction
+                    evt_time = evt_time.replace(tzinfo=None)
+                    now = datetime.datetime.now()
+                    if evt_time > now:
+                        events.append(
+                            (evt_time, re_title, re_url)
+                        )
+
+        return events
+
+    def _fetch_labor_rss(self, url):
+        'fetch event from url and return list (date,title,link)'
+        self.logger.debug(f'fetching labor events from {url}')
+        events = []
+        tree = ET.parse(urlopen(url, timeout=5))
+        root = tree.getroot()
+        now = datetime.datetime.now()
+        for item in root.iter('item'):
+            it_desc = item.find('description').text
+            it_link = item.find('link').text
+
+            event_date, title = self._labor_extract(it_desc)
+            # only collect future events
+            if event_date > now:
+                events.append( (event_date, title, it_link))
+
+        return events 
+
+    def _labor_extract(self, date_title_line):
+        'Extract date and title of event from string in labor rss'
 
         # example: 31.03.2021 (Mi) 19:00 - Workshop Labor-Selbstverständnis VI (Online Event)
 
@@ -81,3 +165,6 @@ class MatrixModule(BotModule):
         dtformat = '%d.%m.%Y %H:%M'
         dt = datetime.datetime.strptime(date.strip(), dtformat)
         return dt, title
+
+    def help(self):
+        return "📅 Die Termine (ls, add, rm)"
