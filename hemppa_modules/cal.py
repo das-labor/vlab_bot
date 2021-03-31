@@ -43,20 +43,24 @@ class MatrixModule(BotModule):
             await bot.send_text(room, msg)
 
     def next_events(self, num=3):
-        'return the next num events (date, title, link).'
+        'return the next num events (date, title, link) sorted by date.'
 
         tree = ET.parse(urlopen(CAL_RSS_URL, timeout=5))
         root = tree.getroot()
         events = []
+        now = datetime.datetime.now()
         for item in root.iter('item'):
             it_desc = item.find('description').text
             it_link = item.find('link').text
 
             event_date, title = self.extract(it_desc)
-            events.append( (event_date, title, it_link))
+            # only collect future events
+            if event_date > now:
+                events.append( (event_date, title, it_link))
 
-            if len(events) >= num:
-                return events
+        # sort events by date
+        events_sorted = sorted(events, key=lambda d_t_l: d_t_l[0])
+        return events_sorted[:num]
 
     def help(self):
         return "📅 Die nächsten Labor-Termine"
