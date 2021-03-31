@@ -14,7 +14,7 @@ class MatrixModule(BotModule):
                 except AttributeError:
                     pass
 
-        msg += "\nWeitere Infos hier https://github.com/das-labor/vlab_bot"
+        msg += "\nWeitere Infos hier https://wiki.das-labor.org/w/Projekt/vLab_Bot"
         await bot.send_text(room, msg)
 
     def help(self):
