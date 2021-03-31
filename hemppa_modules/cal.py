@@ -17,7 +17,11 @@ class MatrixModule(BotModule):
     async def matrix_message(self, bot, room, event):
         msg = '📅 Termine der nächsten Tage:\n'
 
-        for date, title, link in self.next_events():
+        args = event.body.split()
+        if len(args)==1: num = 3
+        elif len(args)==2: num = int(args[1])
+
+        for date, title, link in self.next_events(num):
             evdat = date.strftime('%Y-%m-%d %H:%M')
             msg += f'{evdat} {title}\n'
 
