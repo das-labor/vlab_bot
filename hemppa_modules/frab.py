@@ -25,24 +25,24 @@ class FrabDB(Database):
 
     def remember_announcement(self, url, roomid):
         query = 'INSERT INTO frab_announcements (url,roomid) VALUES (?,?)'
-        self.db.query(query, (url, roomid))
+        self.query(query, (url, roomid))
 
     def add_subscription(self, url):
         query = 'INSERT INTO frab_subscriptions (url) VALUES (?)'
-        self.db.query(query, (url,))
+        self.query(query, (url,))
 
     def delete_subscription(self, url):
         query = 'DELETE FROM frab_subscriptions WHERE url=?'
-        self.db.query(query, (url,))
+        self.query(query, (url,))
 
     def read_subscriptions(self):
-        return [row[0] for row in self.db.query(
+        return [row[0] for row in self.query(
             "SELECT url FROM frab_subscriptions"
         )]
 
     def already_sent(self, url):
-        query = 'SELECT url FROM frab_announcements WHERE url=?'
-        rows = self.db.query(query, (url,))
+        q = 'SELECT url FROM frab_announcements WHERE url=?'
+        rows = self.query(q, (url,))
         return len(rows)>0
 
 
