@@ -24,6 +24,7 @@ class Database(abc.ABC):
     def __init__(self):
         self.dbconn = sqlite3.connect(MAIN_DB_FILE)
         self.dbconn.row_factory = sqlite3.Row
+        self.dbconn.execute('PRAGMA foreign_keys=on')
         self.init_tables()
 
     def query(self, query, params=None):
