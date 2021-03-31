@@ -1,4 +1,6 @@
-# vlab bot
+# vLab Bot
+
+Chatbot for the matrix chat of [das labor](https://das-labor.org).
 
 ## Deployment
 
