@@ -130,9 +130,7 @@ class MatrixModule(BotModule):
                     evt_time = evt_time.replace(tzinfo=None)
                     now = datetime.datetime.now()
                     if evt_time > now:
-                        events.append(
-                            (evt_time, re_title, re_url)
-                        )
+                        events.append( (evt_time, re_title, re_url) )
 
         return events
 
