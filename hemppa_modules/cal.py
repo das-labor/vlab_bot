@@ -21,7 +21,7 @@ class CalDB(Database):
             CREATE TABLE IF NOT EXISTS cal_urltype (
                 name TEST PRIMARY KEY
             );
-            INSERT OR IGNORE INTO cal_urltype(name) VALUES ('frab'),('labor_rss');
+            INSERT OR IGNORE INTO cal_urltype(name) VALUES ('frab'),('labor_rss'),('ical');
             ''')
             self.dbconn.commit()
 
@@ -100,6 +100,7 @@ class MatrixModule(BotModule):
         for url,atype in self.db.read_subscriptions():
             if atype == 'labor_rss': events += self._fetch_labor_rss(url)
             elif atype == 'frab': events += self._fetch_frab(url)
+            elif atype == 'ical': events += self._fetch_ical(url)
             else:
                 self.logger.warn(f'Type unknown {atype} {url}')
 
@@ -157,6 +158,41 @@ class MatrixModule(BotModule):
     # SEQUENCE:34859
     # END:VEVENT
 
+    def _fetch_ical(self, ical_url):
+        'fetch and return events (date,title,link) from ical url'
+        self.logger.debug(f'fetching ical events from {ical_url}')
+        with urlopen(ical_url, timeout=5) as resp:
+            lines = resp.readlines()
+
+        # expected date format: 20210604T190000
+        dformat = '%Y%m%dT%H%M00'
+        events = []
+        for l in lines:
+            line = l.decode().strip()
+            if line == "BEGIN:VEVENT":
+                date,title,link = None,None,None
+            elif line.startswith('SUMMARY:'):
+                title = ':'.join(line.split(':')[1:])
+            elif line.startswith('URL:'):
+                link = ':'.join(line.split(':')[1:])
+            elif line.startswith('DTSTART:'):
+                # expecting DTSTART:20210604T190000
+                datestring = line.split(':')[1]
+                if 'T' not in datestring:
+                    # Time for event missing - ignoring
+                    date = None
+                    continue
+                date = datetime.datetime.strptime(datestring, dformat)
+                if date < datetime.datetime.now():
+                    # ignoring events in the past
+                    date = None
+            elif line == "END:VEVENT":
+                if date!=None and title!=None and link!=None:
+                    events.append( (date,title,link) )
+
+        return events
+
+    # TODO deprecated - remove if ical version works
     def _fetch_labor_rss(self, url):
         'fetch event from url and return list (date,title,link)'
         self.logger.debug(f'fetching labor events from {url}')
