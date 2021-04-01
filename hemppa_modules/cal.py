@@ -97,11 +97,14 @@ class MatrixModule(BotModule):
         'return the next num events (date, title, link) sorted by date.'
         events = []
         for url,atype in self.db.read_subscriptions():
-            if atype == 'labor_rss': events += self._fetch_labor_rss(url)
-            elif atype == 'frab': events += self._fetch_frab(url)
-            elif atype == 'ical': events += self._fetch_ical(url)
-            else:
-                self.logger.warn(f'Type unknown {atype} {url}')
+            try:
+                if atype == 'labor_rss': events += self._fetch_labor_rss(url)
+                elif atype == 'frab': events += self._fetch_frab(url)
+                elif atype == 'ical': events += self._fetch_ical(url)
+                else:
+                    self.logger.warn(f'Type unknown {atype} {url}')
+            except Exception as e:
+                self.logger.error(f'Error during handling of {url}: {e}')
 
         # sort events by date
         events_sorted = sorted(events, key=lambda d_t_l: d_t_l[0])
