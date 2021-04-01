@@ -53,8 +53,8 @@ class MatrixModule(BotModule):
         if len(args)==1:
             msg = '📅 Die nächsten Termine:\n'
             for date, title, link in self.next_events(num=3):
-                evdat = date.strftime('%Y-%m-%d %H:%M')
-                msg += f'{evdat} {title}\n{link}\n'
+                if date > datetime.datetime.now():
+                    msg += f'{date} {title}\n{link}\n'
 
         if len(args)==2 and args[1]=='ls':
             msg = "Hier schaue ich nach Terminen:\n"
