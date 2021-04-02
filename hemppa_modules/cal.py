@@ -5,6 +5,7 @@ import json
 import xml.etree.ElementTree as ET
 import os
 from .db import Database
+import re
 
 #CAL_RSS_URL ="https://www.das-labor.org/termine.rss"
 MAIN_ROOM_ID = os.environ["VLAB_MAIN_ROOM_ID"]
@@ -21,7 +22,7 @@ class CalDB(Database):
             CREATE TABLE IF NOT EXISTS cal_urltype (
                 name TEST PRIMARY KEY
             );
-            INSERT OR IGNORE INTO cal_urltype(name) VALUES ('frab'),('labor_rss'),('ical');
+            INSERT OR IGNORE INTO cal_urltype(name) VALUES ('frab'),('labor_rss'),('ical'),('custom');
             ''')
             self.dbconn.commit()
 
@@ -100,6 +101,7 @@ class MatrixModule(BotModule):
                 if atype == 'labor_rss': events += self._fetch_labor_rss(url)
                 elif atype == 'frab': events += self._fetch_frab(url)
                 elif atype == 'ical': events += self._fetch_ical(url)
+                elif atype == 'custom': events += self._fetch_custom(url)
                 else:
                     self.logger.warn(f'Type unknown {atype} {url}')
             except Exception as e:
@@ -110,6 +112,42 @@ class MatrixModule(BotModule):
         # sort events by date
         events_sorted = sorted(events_future, key=lambda d_t_l: d_t_l[0])
         return events_sorted[:num]
+
+    def _fetch_custom(self, url):
+        'fetch event from url of a page and return list (date,title,link)'
+
+        # temporary custom filter for the following url
+        if url != 'https://di.c3voc.de/sessions-liste':
+            return []
+
+        url_export = url + '?do=export_raw'
+        self.logger.debug(f'fetching events from dokuwiki page {url_export}')
+        with urlopen(url_export, timeout=5) as resp:
+            lines = [l.decode().strip() for l in resp.readlines()]
+
+        events = []
+        re_date = re.compile('.*(\d\.\d\.).*')
+        re_time = re.compile('.* (\d+:\d+).* ')
+        dtformat = '%d.%m.%Y-%H:%M'
+        year = datetime.datetime.now().year
+        ev_date, ev_time, ev_title = None, None, None
+        for line in lines:
+            match = re_date.match(line)
+            if match and len(match.groups())>0:
+                ev_date = match.group(1)
+                
+            match = re_time.match(line)
+            if match and len(match.groups())>0:
+                ev_time = match.group(1)
+                ev_title = line.split('|')[2][:140]
+
+            if ev_date and ev_time and ev_title:
+                dat_string = f'{ev_date}{year}-{ev_time}'
+                d = datetime.datetime.strptime(dat_string, dtformat)
+                events.append((d, ev_title, url))
+                #self.logger.debug(f' event added {events[-1]}')
+
+        return events
 
     def _fetch_frab(self, frab_url):
         'fetch event from frab_url and return list (date,title,link)'
