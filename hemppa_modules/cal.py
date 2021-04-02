@@ -149,6 +149,7 @@ class MatrixModule(BotModule):
                 dat_string = f'{ev_date}{year}-{ev_time}'
                 d = datetime.datetime.strptime(dat_string, dtformat)
                 events.append((d, ev_title, url))
+                ev_time, ev_title = None, None
                 #self.logger.debug(f' event added {events[-1]}')
 
         return events
