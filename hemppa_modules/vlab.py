@@ -61,8 +61,8 @@ class MatrixModule(BotModule):
             room,
             f"{num_clients} {ents_are} im " +
                 "<a href='https://virtuallab.das-labor.org'>virtuellen " +
-                "Labor</a>", 
-            f"{num_clients} {ents_are} sind im virtuellen Labor")            
+                "Labor</a>. Während der ViDOC ist der Eingang <a href='https://world.di.c3voc.de/_/global/das-labor.github.io/workadv_das-labor/main.json'>hier</a>.", 
+            f"{num_clients} {ents_are} sind im virtuellen Labor")
 
     def number_of_clients(self, room, retries=5):
         'Return the numnber of clients in the given room inside a WA instance. Will return None on error.'
