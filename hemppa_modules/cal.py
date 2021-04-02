@@ -57,7 +57,8 @@ class MatrixModule(BotModule):
                 msg += f'{date} {title}\n{link}\n'
 
         if len(args)==2 and args[1]=='ls':
-            msg = "Hier schaue ich nach Terminen:\n"
+            interval = (self.poll_interval * 10) // 60
+            msg = f"Hier schaue ich alle {interval} Minuten nach Terminen:\n"
             for url, type in self.db.read_subscriptions():
                 msg += f'- {url} ({type}) \n'
 
