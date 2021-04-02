@@ -98,6 +98,7 @@ class MatrixModule(BotModule):
         events = []
         for url,atype in self.db.read_subscriptions():
             try:
+                self.logger.debug(f'fetching {atype} events from {url}')
                 if atype == 'labor_rss': events += self._fetch_labor_rss(url)
                 elif atype == 'frab': events += self._fetch_frab(url)
                 elif atype == 'ical': events += self._fetch_ical(url)
@@ -121,7 +122,6 @@ class MatrixModule(BotModule):
             return []
 
         url_export = url + '?do=export_raw'
-        self.logger.debug(f'fetching events from dokuwiki page {url_export}')
         with urlopen(url_export, timeout=5) as resp:
             lines = [l.decode().strip() for l in resp.readlines()]
 
@@ -151,7 +151,6 @@ class MatrixModule(BotModule):
 
     def _fetch_frab(self, frab_url):
         'fetch event from frab_url and return list (date,title,link)'
-        self.logger.debug(f'fetching frab events from {frab_url}')
         events = []
         with urlopen(frab_url, timeout=5) as resp:
             frab = json.load(resp)
@@ -189,7 +188,6 @@ class MatrixModule(BotModule):
         # SEQUENCE:34834
         # END:VEVENT
 
-        self.logger.debug(f'fetching ical events from {ical_url}')
         with urlopen(ical_url, timeout=5) as resp:
             lines = resp.readlines()
 
@@ -224,7 +222,6 @@ class MatrixModule(BotModule):
     # TODO deprecated - remove if ical version works
     def _fetch_labor_rss(self, url):
         'fetch event from url and return list (date,title,link)'
-        self.logger.debug(f'fetching labor events from {url}')
         events = []
         tree = ET.parse(urlopen(url, timeout=5))
         root = tree.getroot()
