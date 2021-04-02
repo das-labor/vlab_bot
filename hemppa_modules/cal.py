@@ -139,7 +139,9 @@ class MatrixModule(BotModule):
             match = re_time.match(line)
             if match and len(match.groups())>0:
                 ev_time = match.group(1)
-                ev_title = line.split('|')[2][:140]
+                title = line.split('|')[2]
+                ev_title = title[:140]
+                if len(title)!=len(ev_title): ev_title += '...'
 
             if ev_date and ev_time and ev_title:
                 dat_string = f'{ev_date}{year}-{ev_time}'
