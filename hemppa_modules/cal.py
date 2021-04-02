@@ -141,6 +141,7 @@ class MatrixModule(BotModule):
             if match and len(match.groups())>0:
                 ev_time = match.group(1)
                 title = line.split('|')[2]
+                title = title.replace('**','').replace('\\\\','|')
                 ev_title = title[:140]
                 if len(title)!=len(ev_title): ev_title += '...'
 
