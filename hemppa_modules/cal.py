@@ -53,8 +53,7 @@ class MatrixModule(BotModule):
         if len(args)==1:
             msg = '📅 Die nächsten Termine:\n'
             for date, title, link in self.next_events(num=3):
-                if date > datetime.datetime.now():
-                    msg += f'{date} {title}\n{link}\n'
+                msg += f'{date} {title}\n{link}\n'
 
         if len(args)==2 and args[1]=='ls':
             msg = "Hier schaue ich nach Terminen:\n"
@@ -106,8 +105,10 @@ class MatrixModule(BotModule):
             except Exception as e:
                 self.logger.error(f'Error during handling of {url}: {e}')
 
+        # only consider future events
+        events_future = [e for e in events if e[0] > datetime.datetime.now()]
         # sort events by date
-        events_sorted = sorted(events, key=lambda d_t_l: d_t_l[0])
+        events_sorted = sorted(events_future, key=lambda d_t_l: d_t_l[0])
         return events_sorted[:num]
 
     def _fetch_frab(self, frab_url):
