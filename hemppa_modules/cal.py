@@ -7,7 +7,6 @@ import os
 from .db import Database
 import re
 
-#CAL_RSS_URL ="https://www.das-labor.org/termine.rss"
 MAIN_ROOM_ID = os.environ["VLAB_BOT_MAIN_ROOM_ID"]
 
 class CalDB(Database):
