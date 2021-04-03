@@ -81,8 +81,6 @@ class MatrixModule(BotModule):
             return
 
         for event_date, title, link in self.next_events(num=5):
-            # now  |  event date | next poll interval
-            #
             time_until_event = event_date - datetime.datetime.now()
             if 0 < time_until_event.total_seconds() < self.poll_interval * 10:
                 room = bot.get_room_by_id(self.main_room)
