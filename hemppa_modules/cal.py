@@ -88,6 +88,7 @@ class MatrixModule(BotModule):
         if pollcount % self.poll_interval != 0:
             return
 
+        self.logger.debug(f'polling events pollcount={pollcount}')
         for ev in self.next_events(num=5):
             time_until_event = ev.date - datetime.datetime.now()
             if 0 < time_until_event.total_seconds() < self.poll_interval * 10:
