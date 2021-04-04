@@ -6,8 +6,16 @@ import xml.etree.ElementTree as ET
 import os
 from .db import Database
 import re
+from dataclasses import dataclass
 
 MAIN_ROOM_ID = os.environ["VLAB_BOT_MAIN_ROOM_ID"]
+
+@dataclass
+class Event:
+    date: datetime.datetime
+    title: str
+    link: str
+
 
 class CalDB(Database):
     def init_tables(self):
@@ -52,14 +60,14 @@ class MatrixModule(BotModule):
 
         if len(args)==1:
             msg = '📅 Die nächsten Termine:\n'
-            for date, title, link in self.next_events(num=3):
-                msg += f'{date} {title}\n{link}\n'
+            for ev in self.next_events(num=3):
+                msg += f'{ev.date} {ev.title}\n{ev.link}\n'
 
         if len(args)==2 and args[1]=='ls':
             interval = (self.poll_interval * 10) // 60
             msg = f"Hier schaue ich alle {interval} Minuten nach Terminen:\n"
-            for url, type in self.db.read_subscriptions():
-                msg += f'- {url} ({type}) \n'
+            for url, atype in self.db.read_subscriptions():
+                msg += f'- {url} ({atype}) \n'
 
         if len(args)==4 and args[1]=='add':
             bot.must_be_owner(event)
@@ -80,14 +88,14 @@ class MatrixModule(BotModule):
         if pollcount % self.poll_interval != 0:
             return
 
-        for event_date, title, link in self.next_events(num=5):
-            time_until_event = event_date - datetime.datetime.now()
+        for ev in self.next_events(num=5):
+            time_until_event = ev.date - datetime.datetime.now()
             if 0 < time_until_event.total_seconds() < self.poll_interval * 10:
                 room = bot.get_room_by_id(self.main_room)
                 if room is None:
                     return
 
-                msg = f"⏰ Gleich: {title} ({event_date})\n{link}"
+                msg = f"⏰ Gleich: {ev.title} ({ev.date})\n{ev.link}"
                 self.logger.debug(f'notify event: {msg}')
                 await bot.send_text(room, msg)
 
@@ -107,13 +115,13 @@ class MatrixModule(BotModule):
                 self.logger.error(f'Error during handling of {url}: {e}')
 
         # only consider future events
-        events_future = [e for e in events if e[0] > datetime.datetime.now()]
+        events_future = [e for e in events if e.date > datetime.datetime.now()]
         # sort events by date
-        events_sorted = sorted(events_future, key=lambda d_t_l: d_t_l[0])
+        events_sorted = sorted(events_future, key=lambda e: e.date)
         return events_sorted[:num]
 
     def _fetch_custom(self, url):
-        'fetch event from url of a page and return list (date,title,link)'
+        'fetch and return list of events from url.'
 
         # temporary custom filter for the following url
         if url != 'https://di.c3voc.de/sessions-liste':
@@ -145,14 +153,14 @@ class MatrixModule(BotModule):
             if ev_date and ev_time and ev_title:
                 dat_string = f'{ev_date}{year}-{ev_time}'
                 d = datetime.datetime.strptime(dat_string, dtformat)
-                events.append((d, ev_title, url))
+                events.append(Event(d, ev_title, url))
                 ev_time, ev_title = None, None
                 #self.logger.debug(f' event added {events[-1]}')
 
         return events
 
     def _fetch_frab(self, frab_url):
-        'fetch event from frab_url and return list (date,title,link)'
+        'fetch and return list of event from frab_url.'
         events = []
         with urlopen(frab_url, timeout=5) as resp:
             frab = json.load(resp)
@@ -173,12 +181,12 @@ class MatrixModule(BotModule):
                     evt_time = evt_time.replace(tzinfo=None)
                     now = datetime.datetime.now()
                     if evt_time > now:
-                        events.append( (evt_time, re_title, re_url) )
+                        events.append(Event( evt_time, re_title, re_url))
 
         return events
 
     def _fetch_ical(self, ical_url):
-        'fetch and return events (date,title,link) from ical url. not ical feature complete'
+        'fetch and return events from ical url. not ical feature complete'
         # Handling entries of the form
         # 
         # BEGIN:VEVENT
@@ -217,13 +225,13 @@ class MatrixModule(BotModule):
                     date = None
             elif line == "END:VEVENT":
                 if date!=None and title!=None and link!=None:
-                    events.append( (date,title,link) )
+                    events.append(Event(date,title,link))
 
         return events
 
     # TODO deprecated - remove if ical version works
     def _fetch_labor_rss(self, url):
-        'fetch event from url and return list (date,title,link)'
+        'fetch events from url.'
         events = []
         tree = ET.parse(urlopen(url, timeout=5))
         root = tree.getroot()
@@ -235,7 +243,7 @@ class MatrixModule(BotModule):
             event_date, title = self._labor_extract(it_desc)
             # only collect future events
             if event_date > now:
-                events.append( (event_date, title, it_link))
+                events.append(Event(event_date, title, it_link))
 
         return events 
 
