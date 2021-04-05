@@ -8,9 +8,12 @@ import datetime
 
 NUM_RESULTS = 3
 WIKI_BASE_URL = "https://wiki.das-labor.org"
-API_SEARCH_PREFIX = WIKI_BASE_URL + f"/api.php?action=query&format=json&list=search&srlimit={NUM_RESULTS}&srsearch="
+API_SEARCH_PREFIX = WIKI_BASE_URL + \
+    f"/api.php?action=query&format=json&list=search&srlimit={NUM_RESULTS}&srsearch="
 MAIN_ROOM_ID = os.environ["VLAB_BOT_MAIN_ROOM_ID"]
-RECENT_CHANGES_URL = WIKI_BASE_URL + '/api.php?action=feedrecentchanges&hidebots=1&hideminor=1&days=1&limit=10&namespace=0&feedformat=atom'
+RECENT_CHANGES_URL = WIKI_BASE_URL + \
+    '/api.php?action=feedrecentchanges&hidebots=1&hideminor=1&days=1&limit=10' + \
+    '&namespace=0&feedformat=atom'
 
 class MatrixModule(BotModule):
     def __init__(self,name):
@@ -32,7 +35,7 @@ class MatrixModule(BotModule):
             with urlopen(API_SEARCH_PREFIX + query, timeout=5) as resp:
                 js = json.load(resp)
 
-            answer = "Mal schauen, was ich im Wiki so gefunden habe.\n"
+            answer = "🔎 Mal schauen, was ich im Wiki so gefunden habe.\n"
             results = js['query']['search']
             for result in results:
                 answer += WIKI_BASE_URL + "/w/" + \
