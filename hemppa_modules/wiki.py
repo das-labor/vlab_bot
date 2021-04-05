@@ -21,7 +21,10 @@ class MatrixModule(BotModule):
         # !wiki some query
         args = event.body.split()
 
-        if len(args) > 1:
+        if len(args) == 1:
+            await self._check_recent_changes(bot, room)
+
+        elif len(args) > 1:
             query = urllib.parse.quote(
                 ' '.join(args[1:])
                 )
@@ -48,12 +51,14 @@ class MatrixModule(BotModule):
         if pollcount % self.poll_interval != 0:
             return
 
-        self.logger.debug('polling recent changes')
-
-        room = bot.get_room_by_id(self.mainroom_id)
+        room = bot.get_room_by_id(MAIN_ROOM_ID)
         if room is None:
             return
 
+        self.logger.debug('polling recent changes')
+        await self._check_recent_changes(bot, room)
+
+    async def _check_recent_changes(self, bot, room):
         msg = '🔎 Im Wiki gab es ein paar Änderungen\n'
         root = ET.parse(urlopen(RECENT_CHANGES_URL, timeout=5)).getroot()
 
