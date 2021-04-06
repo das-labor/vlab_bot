@@ -20,4 +20,4 @@ class MatrixModule(BotModule):
             random.choice(["Infektionszahlen","privaten Treffen", "Wirtschaftsleistung", "Wahlprognosen", "dritten Welle", "Bunderskanzlerin"]) + "."
 
     def help(self):
-        return "Pandemieberatung."
+        return "🤡 Armins Pandemieberatung."
