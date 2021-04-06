@@ -56,7 +56,7 @@ class MatrixModule(BotModule):
                 thing = ' '.join(args[2:])
                 if date > datetime.datetime.now():
                     self.db.add_remembering(date, thing)
-                    msg += f"Erinne an {thing} am {date}"
+                    msg += f"Termin gemerkt: {date}"
                 else:
                     msg += 'Das Datum muss in der Zukunft liegen.'
             except Exception as e:
