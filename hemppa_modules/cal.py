@@ -200,13 +200,12 @@ class MatrixModule(BotModule):
         # END:VEVENT
 
         with urlopen(ical_url, timeout=5) as resp:
-            lines = resp.readlines()
+            lines = [l.decode().strip() for l in resp.readlines()]
 
         # expected date format: 20210604T190000
         dformat = '%Y%m%dT%H%M00'
         events = []
-        for l in lines:
-            line = l.decode().strip()
+        for line in lines:
             if line == "BEGIN:VEVENT":
                 date,title,link = None,None,None
             elif line.startswith('SUMMARY:'):
