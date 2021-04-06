@@ -61,7 +61,7 @@ class MatrixModule(BotModule):
             room,
             f"{num_clients} {ents_are} im " +
                 "<a href='https://virtuallab.das-labor.org'>virtuellen " +
-                "Labor</a>. Während der DiVOC ist der Eingang <a href='https://world.di.c3voc.de/_/global/world.di.c3voc.de/maps/daslabor/main.json'>hier</a>.", 
+                "Labor</a>.", 
             f"{num_clients} {ents_are} sind im virtuellen Labor")
 
     def number_of_clients(self, room, retries=5):
