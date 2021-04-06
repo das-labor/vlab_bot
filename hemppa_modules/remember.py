@@ -45,7 +45,7 @@ class MatrixModule(BotModule):
         self.db = RememberDB()
 
     async def matrix_message(self, bot, room, event):
-        args = event.body.split()
+        args = event.body.split(' ')
 
         msg = ''
         if len(args)==1:
