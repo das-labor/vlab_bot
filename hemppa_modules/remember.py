@@ -61,7 +61,7 @@ class MatrixModule(BotModule):
         elif len(args)==2 and args[1]=='ls':
             bot.must_be_owner(event)
             for date,thing in self.db.get_all_things():
-                msg += f'- {date}: {thing}'
+                msg += f'- {date}: {thing}\n'
 
         elif len(args)>=3:
             try:
@@ -69,7 +69,7 @@ class MatrixModule(BotModule):
                 thing = ' '.join(args[2:])
                 if date > datetime.datetime.now():
                     self.db.add_remembering(date, thing)
-                    msg += f"Termin gemerkt: {date}\n"
+                    msg += f"Termin gemerkt: {date}"
                 else:
                     msg += 'Das Datum muss in der Zukunft liegen.'
             except Exception as e:
