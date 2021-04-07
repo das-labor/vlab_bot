@@ -60,11 +60,8 @@ class MatrixModule(BotModule):
             msg = 'z.B. so: !remember 2042-01-01T00:01 Sylvester'
         elif len(args)==2 and args[1]=='ls':
             bot.must_be_owner(event)
-            msg=''
             for date,thing in self.db.get_all_things():
                 msg += f'- {date}: {thing}'
-            if msg:
-                await bot.send_text(room, msg)
 
         elif len(args)>=3:
             try:
