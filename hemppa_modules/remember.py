@@ -31,6 +31,14 @@ class RememberDB(Database):
             (date.isoformat(),)
         )]
 
+    def get_all_things(self):
+        'return all things (date, thing) I have remembered'
+        return [
+            (datetime.datetime.fromisoformat(row['date']), row['thing']) 
+            for row in self.query(
+                'SELECT date,thing FROM remember_things')
+        ]
+
     def remove_things_until(self, date_until:datetime.datetime):
         'remove things in until given date'
         self.query('''
@@ -49,7 +57,15 @@ class MatrixModule(BotModule):
 
         msg = ''
         if len(args)==1:
-            msg = 'z.B. so: !remember 2021-01-01T00:01 Sylvester'
+            msg = 'z.B. so: !remember 2042-01-01T00:01 Sylvester'
+        elif len(args)==2 and args[1]=='ls':
+            bot.must_be_owner(event)
+            msg=''
+            for date,thing in self.db.get_all_things():
+                msg += f'- {date}: {thing}'
+            if msg:
+                await bot.send_text(room, msg)
+
         elif len(args)>=3:
             try:
                 date = datetime.datetime.fromisoformat(args[1])
