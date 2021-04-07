@@ -36,7 +36,7 @@ class RememberDB(Database):
         return [
             (datetime.datetime.fromisoformat(row['date']), row['thing']) 
             for row in self.query(
-                'SELECT date,thing FROM remember_things')
+                'SELECT date,thing FROM remember_things ORDER BY date')
         ]
 
     def remove_things_until(self, date_until:datetime.datetime):
