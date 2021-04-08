@@ -5,6 +5,7 @@ import urllib.parse
 import json
 import os
 import datetime
+from .db import Config
 
 NUM_RESULTS = 3
 WIKI_BASE_URL = "https://wiki.das-labor.org"
@@ -18,7 +19,24 @@ RECENT_CHANGES_URL = WIKI_BASE_URL + \
 class MatrixModule(BotModule):
     def __init__(self,name):
         super().__init__(name)
-        self.poll_interval = 6*60*24 # * 10 seconds
+        self.poll_interval = 6 # * 10 seconds
+        self.config = Config()
+        self.config_key = 'wiki_last_sent'
+        if self._get_last_sent() is None:
+            self._set_last_sent_now()
+
+    def _set_last_sent_now(self):
+        'remember last sent entry'
+        now = datetime.datetime.now().isoformat()
+        self.config.set_value(self.config_key, now)
+
+    def _get_last_sent(self):
+        'return datetime of last sent announcement'
+        v = self.config.get_value(self.config_key)
+        if v is not None:
+            return datetime.datetime.fromisoformat(v)
+        else:
+            return v
 
     async def matrix_message(self, bot, room, event):
         # !wiki some query
@@ -58,8 +76,11 @@ class MatrixModule(BotModule):
         if room is None:
             return
 
-        self.logger.debug('polling recent changes')
-        await self._check_recent_changes(bot, room)
+        now = datetime.datetime.now()
+        duration = now - self._get_last_sent()
+        if duration.days >= 1:
+            self.logger.debug('polling recent changes')
+            await self._check_recent_changes(bot, room)
 
     async def _check_recent_changes(self, bot, room):
         msg = '🔎 Im Wiki gab es ein paar Änderungen\n'
@@ -76,6 +97,7 @@ class MatrixModule(BotModule):
         if num_entries > 0:
             self.logger.debug('posting recent changes')
             await bot.send_text(room, msg)
+            self._set_last_sent_now()
 
     def help(self):
         update_hours = int((self.poll_interval * 10) / 60 / 60)
