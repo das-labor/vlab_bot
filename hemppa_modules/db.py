@@ -51,16 +51,21 @@ class Config(Database):
             ''')
             self.dbconn.commit()
 
-    def get_value(self, key):
-        'read config.'
+    def get_value(self, key, default=None):
+        'read config, return default value if no value present.'
 
         query = "SELECT value FROM config WHERE key=?"
         rows = self.query(query, (key,))
 
-        assert len(rows)==1, f'no value for {key}'
-        return rows[0]['value']
+        if len(rows)==0:
+            return default
+        else:
+            return rows[0]['value']
 
     def set_value(self, key, value):
-        query = "INSERT INTO config (key,value) VALUES (?,?)"
-        self.query(query, (key,value))
+        if self.get_value(key) is None:
+            query = "INSERT INTO config (value,key) VALUES (?,?)"
+        else:
+            query = "UPDATE config SET value=? WHERE key=?"
 
+        self.query(query, (value,key))
