@@ -1,30 +1,28 @@
 from .db import Database
 import datetime
-import os
 from modules.common.module import BotModule
-
-MAIN_ROOM_ID = os.environ["VLAB_BOT_MAIN_ROOM_ID"]
 
 class RememberDB(Database):
     def init_tables(self):
         with self.dbconn:
             self.dbconn.execute('''
             CREATE TABLE IF NOT EXISTS remember_things (
-                date DATE,
-                thing TEXT 
+                date DATE NOT NULL,
+                thing TEXT NOT NULL,
+                roomid TEST NOT NULL
             )
             ''')
             self.dbconn.commit()
 
-    def add_remembering(self, date:datetime.datetime, thing:str):
-        query = 'INSERT INTO remember_things (date, thing) VALUES (?,?)'
-        self.query(query, (date.isoformat(),thing))
+    def add_remembering(self, date:datetime.datetime, thing:str, room):
+        query = 'INSERT INTO remember_things (date, thing, roomid) VALUES (?,?,?)'
+        self.query(query, (date.isoformat(),thing,room.room_id))
 
     def get_things_until(self, date:datetime.datetime):
-        'Return list of remembered things until given date'
-        return [row[0] for row in self.query(
+        'Return list of remembered things (thing,roomid) until given date'
+        return [(row[0],row[1]) for row in self.query(
             """
-            SELECT thing 
+            SELECT thing,roomid 
             FROM remember_things
             WHERE date <= ?
             """,
@@ -68,7 +66,7 @@ class MatrixModule(BotModule):
                 date = datetime.datetime.fromisoformat(args[1])
                 thing = ' '.join(args[2:])
                 if date > datetime.datetime.now():
-                    self.db.add_remembering(date, thing)
+                    self.db.add_remembering(date, thing, room)
                     msg += f"Termin gemerkt: {date}"
                 else:
                     msg += 'Das Datum muss in der Zukunft liegen.'
@@ -83,20 +81,18 @@ class MatrixModule(BotModule):
         if pollcount % self.poll_interval != 0:
             return
 
-        room = bot.get_room_by_id(MAIN_ROOM_ID)
-        if room is None:
-            return
-
         duntil = datetime.datetime.now() + \
             datetime.timedelta(seconds=self.poll_interval*10)
-        msg = ''
-        for thing in self.db.get_things_until(duntil):
-            msg += f"⏰ Erinnerung: {thing}\n"
 
-        if msg:
+        for thing,roomid in self.db.get_things_until(duntil):
+            room = bot.get_room_by_id(roomid)
+            if room is None: continue
+
+            msg = f"⏰ Erinnerung: {thing}\n"
             self.logger.debug(f'notify: {msg}')
             await bot.send_text(room, msg)
-            self.db.remove_things_until(duntil)
+
+        self.db.remove_things_until(duntil)
 
     def help(self):
         return "📅 Ich erinnere an Dinge."
