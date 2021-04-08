@@ -31,6 +31,7 @@ class CalDB(Database):
             );
             INSERT OR IGNORE INTO cal_urltype(name) VALUES ('frab'),('labor_rss'),('ical'),('custom');
             ''')
+            # TODO deprecated - remove labor_rss if ical version works
             self.dbconn.commit()
 
     def add_subscription(self, url, url_type):
@@ -106,7 +107,7 @@ class MatrixModule(BotModule):
         for url,atype in self.db.read_subscriptions():
             try:
                 self.logger.debug(f'fetching {atype} events from {url}')
-                if atype == 'labor_rss': events += self._fetch_labor_rss(url)
+                if atype == 'labor_rss': events += self._fetch_labor_rss(url)  # TODO deprecated - remove if ical version works
                 elif atype == 'frab': events += self._fetch_frab(url)
                 elif atype == 'ical': events += self._fetch_ical(url)
                 elif atype == 'custom': events += self._fetch_custom(url)
@@ -247,6 +248,7 @@ class MatrixModule(BotModule):
 
         return events 
 
+    # TODO deprecated - remove if ical version works
     def _labor_extract(self, date_title_line):
         'Extract date and title of event from string in labor rss'
 
