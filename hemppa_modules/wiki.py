@@ -4,7 +4,7 @@ from urllib.request import urlopen
 import urllib.parse
 import json
 import os
-import datetime
+from datetime import datetime
 from .db import Config
 
 NUM_RESULTS = 3
@@ -27,14 +27,14 @@ class MatrixModule(BotModule):
 
     def _set_last_sent_now(self):
         'remember last sent entry'
-        now = datetime.datetime.now().isoformat()
+        now = datetime.now().isoformat()
         self.config.set_value(self.config_key, now)
 
     def _get_last_sent(self):
         'return datetime of last sent announcement'
         v = self.config.get_value(self.config_key)
         if v is not None:
-            return datetime.datetime.fromisoformat(v)
+            return datetime.fromisoformat(v)
         else:
             return v
 
@@ -76,7 +76,7 @@ class MatrixModule(BotModule):
         if room is None:
             return
 
-        now = datetime.datetime.now()
+        now = datetime.now()
         duration = now - self._get_last_sent()
         if duration.days >= 1:
             self.logger.debug('polling recent changes')
