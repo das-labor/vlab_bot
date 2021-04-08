@@ -83,20 +83,19 @@ class MatrixModule(BotModule):
             await self._check_recent_changes(bot, room)
 
     async def _check_recent_changes(self, bot, room):
-        msg = '🔎 Im Wiki gab es ein paar Änderungen\n'
+        'check for recent changed in wiki in post if necessary'
         root = ET.parse(urlopen(RECENT_CHANGES_URL, timeout=5)).getroot()
-
         ns = '{http://www.w3.org/2005/Atom}'
-        num_entries = 0
+        msg = ''
         for entry in root.iter(f'{ns}entry'):
             href = entry.find(f'{ns}link').attrib['href']
             title = entry.find(f'{ns}title').text
             msg += f'- {title}: {href}\n'
-            num_entries += 1
 
-        if num_entries > 0:
+        if len(msg) > 0:
             self.logger.debug('posting recent changes')
-            await bot.send_text(room, msg)
+            await bot.send_text(room, 
+                '🔎 Im Wiki gab es ein paar Änderungen:\n' + msg)
             self._set_last_sent_now()
 
     def help(self):
