@@ -40,15 +40,13 @@ class MatrixModule(BotModule):
 
     async def matrix_message(self, bot, room, event):
         # !wiki some query
-        args = event.body.split()
+        args = event.body.split(' ', maxsplit=1)
 
         if len(args) == 1:
             await self._check_recent_changes(bot, room)
 
-        elif len(args) > 1:
-            query = urllib.parse.quote(
-                ' '.join(args[1:])
-                )
+        elif len(args)==2:
+            query = urllib.parse.quote(args[1])
 
             with urlopen(API_SEARCH_PREFIX + query, timeout=5) as resp:
                 js = json.load(resp)
