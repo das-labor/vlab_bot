@@ -12,18 +12,7 @@ class MatrixModule(BotModule):
 
         if 'url' in js:
             img_url = HOST + js["url"]
-            matrix_img_url = await bot.upload_image(img_url)
-            if matrix_img_url:
-                await bot.send_image(room, matrix_img_url, "a cat")
-
-            # Old version just linking to the image. Will not be shown by 
-            # default.
-            '''
-            await bot.send_html(
-                room,
-                f"cat <img src='{img_url}'> content",
-                f"Cat content {img_url}")
-            '''
+            await bot.upload_and_send_image(room, img_url)
 
     def help(self):
         return "🐱 Cat content."
