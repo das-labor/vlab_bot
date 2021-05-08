@@ -10,6 +10,6 @@ be placed inside the `modules` folder of a running hemppa-instance.
 
 Some modules (and hemppa itself) require environment variables. 
 On startup you will see
-with variables are missing. Add them to the `run.sh` script.
+which variables are missing. Add them to the `run.sh` script.
 A good way to find places which use environment variable is
 `grep 'os.environ' hemppa_modules/*`.
