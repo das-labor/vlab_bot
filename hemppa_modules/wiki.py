@@ -97,6 +97,4 @@ class MatrixModule(BotModule):
             self._set_last_sent_now()
 
     def help(self):
-        update_hours = int((self.poll_interval * 10) / 60 / 60)
-        return "🔎 Durchsuche das Labor-Wiki. Berichte alle " + \
-            f"{update_hours} Stunden über Änderungen am Wiki."
+        return "🔎 Durchsuche das Labor-Wiki. Berichte über Änderungen am Wiki."
