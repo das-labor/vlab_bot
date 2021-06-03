@@ -19,7 +19,7 @@ RECENT_CHANGES_URL = WIKI_BASE_URL + \
 class MatrixModule(BotModule):
     def __init__(self,name):
         super().__init__(name)
-        self.poll_interval = 6 # * 10 seconds
+        self.poll_interval = 6 * 60 * 24 # * 10 seconds
         self.config = Config()
         self.config_key = 'wiki_last_sent'
         if self._get_last_sent() is None:
