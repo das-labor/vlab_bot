@@ -21,15 +21,15 @@ class CalDB(Database):
     def init_tables(self):
         with self.dbconn:
             self.dbconn.executescript('''
+            CREATE TABLE IF NOT EXISTS cal_urltype (
+                name TEST PRIMARY KEY
+            );
+            INSERT OR IGNORE INTO cal_urltype(name) VALUES ('frab'),('labor_rss'),('ical'),('custom');
             CREATE TABLE IF NOT EXISTS cal_subscription (
                 url TEXT PRIMARY KEY,
                 type TEXT,
                 FOREIGN KEY (type) REFERENCES cal_urltype(name)
             );
-            CREATE TABLE IF NOT EXISTS cal_urltype (
-                name TEST PRIMARY KEY
-            );
-            INSERT OR IGNORE INTO cal_urltype(name) VALUES ('frab'),('labor_rss'),('ical'),('custom');
             ''')
             # TODO deprecated - remove labor_rss if ical version works
             self.dbconn.commit()
