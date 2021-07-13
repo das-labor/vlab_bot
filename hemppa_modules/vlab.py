@@ -45,6 +45,7 @@ class MatrixModule(BotModule):
             return
 
         num = self.number_of_clients('main')
+        self.logger.debug(f'found {num} clients')
         if num is None or num==0 or num==self.last_num_clients_seen:
             return
 
@@ -52,6 +53,7 @@ class MatrixModule(BotModule):
             time.time() - self.last_intrinsic_announcement < ANNOUNCEMENT_INTERVAL:
             return
 
+        self.logger.debug('announcing clients in the vlab')
         await self.announce(bot, room, num)
         self.last_num_clients_seen = num
         self.last_intrinsic_announcement = time.time()
