@@ -67,14 +67,14 @@ class MatrixModule(BotModule):
                 "Labor</a>.", 
             f"{num_clients} {ents_are} sind im virtuellen Labor")
 
-    def number_of_clients(self, room, retries=5):
+    def number_of_clients(self, room, retries=3):
         'Return the numnber of clients in the given room inside a WA instance. Will return None on error.'
 
         for _ in range(retries):  
             # retrieve metrics and handle errors
             # https://docs.python.org/3/howto/urllib2.html
             try:
-                response = urlopen(METRICS_URL, timeout=5)
+                response = urlopen(METRICS_URL, timeout=2)
                 lines = response.readlines()
             except HTTPError as e:
                 self.logger.error(f'The server couldnt fulfill the request. {e.code}')
