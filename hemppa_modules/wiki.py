@@ -70,6 +70,7 @@ class MatrixModule(BotModule):
         if pollcount % self.poll_interval != 0:
             return
 
+        self.logger.debug('checking changes in wiki')
         room = bot.get_room_by_id(MAIN_ROOM_ID)
         if room is None:
             return
@@ -80,6 +81,8 @@ class MatrixModule(BotModule):
             self.logger.debug('polling recent changes')
             await self._check_recent_changes(bot, room)
 
+        self.logger.debug('finished checking wiki changes')
+        
     async def _check_recent_changes(self, bot, room):
         'check for recent changes in wiki if necessary'
         root = ET.parse(urlopen(RECENT_CHANGES_URL, timeout=5)).getroot()

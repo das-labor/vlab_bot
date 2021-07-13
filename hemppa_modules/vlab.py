@@ -39,6 +39,7 @@ class MatrixModule(BotModule):
         if pollcount % self.poll_interval != 0:
             return
 
+        self.logger.debug('checking number of vlab clients')
         room = bot.get_room_by_id(MAIN_ROOM_ID)
         if room is None:
             return
@@ -54,6 +55,8 @@ class MatrixModule(BotModule):
         await self.announce(bot, room, num)
         self.last_num_clients_seen = num
         self.last_intrinsic_announcement = time.time()
+
+        self.logger.debug('fnished checking vlab clients')
 
     async def announce(self, bot, room, num_clients):
         ents_are = "Entität ist" if num_clients==1 else "Entitäten sind"

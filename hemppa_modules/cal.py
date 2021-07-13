@@ -89,7 +89,7 @@ class MatrixModule(BotModule):
         if pollcount % self.poll_interval != 0:
             return
 
-        self.logger.debug(f'polling events pollcount={pollcount}')
+        self.logger.debug('polling events')
         for ev in self.next_events(num=5):
             time_until_event = ev.date - datetime.datetime.now()
             if 0 < time_until_event.total_seconds() < self.poll_interval * 10:
@@ -100,6 +100,7 @@ class MatrixModule(BotModule):
                 msg = f"⏰ Gleich: {ev.title} ({ev.date})\n{ev.link}"
                 self.logger.debug(f'notify event: {msg}')
                 await bot.send_text(room, msg)
+        self.logger.debug('polling events finished')
 
     def next_events(self, num=3):
         'return the next num events (date, title, link) sorted by date.'

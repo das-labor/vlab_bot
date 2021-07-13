@@ -81,6 +81,7 @@ class MatrixModule(BotModule):
         if pollcount % self.poll_interval != 0:
             return
 
+        self.logger.debug('checking dates to be remembered')
         duntil = datetime.datetime.now() + \
             datetime.timedelta(seconds=self.poll_interval*10)
 
@@ -93,6 +94,7 @@ class MatrixModule(BotModule):
             await bot.send_text(room, msg)
 
         self.db.remove_things_until(duntil)
+        self.logger.debug('checking dates finished')
 
     def help(self):
         return "📅 Ich erinnere an Dinge."
