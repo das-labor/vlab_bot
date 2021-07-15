@@ -1,7 +1,6 @@
 from modules.common.module import BotModule
 from urllib.request import urlopen
 import json
-import threading
 
 
 LABOR_STATUS_URL = "https://das-labor.org/status/status.php?status"
@@ -14,7 +13,6 @@ class MatrixModule(BotModule):
     async def matrix_message(self, bot, room, event):
         await self.open_closed(bot, room)
         await self.freifunk_nodes(bot, room)
-        await bot.send_text(room, f'vLab Bot: {threading.active_count()} laufende Threads')
 
     async def open_closed(self, bot, room):
         with urlopen(LABOR_STATUS_URL, timeout=5) as response:
