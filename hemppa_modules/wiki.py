@@ -99,6 +99,7 @@ class MatrixModule(BotModule):
         
     async def _check_recent_changes(self, bot, room):
         'check for recent changes in wiki if necessary'
+        self.logger.debug('Checking for recent changes')
         root = ET.parse(urlopen(RECENT_CHANGES_URL, timeout=5)).getroot()
         ns = '{http://www.w3.org/2005/Atom}'
         msg = ''
