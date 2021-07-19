@@ -24,11 +24,13 @@ class MatrixModule(BotModule):
         self.config_key = 'wiki_last_sent'
         if self._get_last_sent() is None:
             self._set_last_sent_now()
+        self.last_sent = self._get_last_sent()
 
     def _set_last_sent_now(self):
         'remember last sent entry'
         now = datetime.now().isoformat()
         self.config.set_value(self.config_key, now)
+        self.last_sent = now
 
     def _get_last_sent(self):
         'return datetime of last sent announcement'
@@ -37,6 +39,16 @@ class MatrixModule(BotModule):
             return datetime.fromisoformat(v)
         else:
             return v
+
+    def get_settings(self):
+        data = super().get_settings()
+        data['last_sent'] = self.last_sent
+        return data
+
+    def set_settings(self, data):
+        super().set_settings(data)
+        if data.get('last_sent'):
+            self.last_sent = data['last_sent']
 
     async def matrix_message(self, bot, room, event):
         # !wiki some query
