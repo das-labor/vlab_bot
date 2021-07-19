@@ -264,14 +264,19 @@ class MatrixModule(BotModule):
         return dt, title
 
     def help(self):
-        return "📅 Die Termine (ls, add, rm)"
+        return "📅 Ich schaue regelmäßig nach anstehenden Terminen."
 
     def long_help(self, bot, event, **kwargs):
-        return self.help() + \
-            f' Ich schaue alle {self.poll_interval * 10} Sekunden nach ' + \
-            'anstehenden Terminen. Die Orte, an denen ich nach Terminen schaue, ' + \
+        text = self.help() + \
+            f' Ich schaue alle {self.poll_interval * 10 / 60} Minuten an ' + \
+            'verschiedenen Orten nach anstehenden Terminen. Diese Orte ' + \
             'können mit ls, add, rm verändert werden.\n' + \
-            '- ls: listet die aktuellen Orte/URLs auf\n' + \
-            '- add URL TYPE (nur für Admins): fügt eine URL hinzu. Mögliche ' + \
-            'Werte für TYPE sind frab, labor_rss, ical, custom.' + \
-            '- rm URL (nur für Admins): entfernt eine URL'
+            '!cal ls: listet die aktuellen Orte/URLs auf\n'
+
+        if bot.is_owner(event):
+            text += \
+                '!cal add URL TYPE: fügt eine URL ' + \
+                'hinzu. Mögliche Werte für TYPE sind frab, ical, custom.\n' + \
+                '!cal rm URL: entfernt eine URL'
+
+        return text
