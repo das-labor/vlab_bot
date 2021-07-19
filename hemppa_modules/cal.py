@@ -268,7 +268,7 @@ class MatrixModule(BotModule):
 
     def long_help(self, bot, event, **kwargs):
         text = self.help() + \
-            f' Ich schaue alle {self.poll_interval * 10 / 60} Minuten an ' + \
+            f' Ich schaue alle {self.poll_interval * 10 // 60} Minuten an ' + \
             'verschiedenen Orten nach anstehenden Terminen. Diese Orte ' + \
             'können mit ls, add, rm verändert werden.\n' + \
             '!cal ls: listet die aktuellen Orte/URLs auf\n'
