@@ -265,3 +265,13 @@ class MatrixModule(BotModule):
 
     def help(self):
         return "📅 Die Termine (ls, add, rm)"
+
+    def long_help(self, bot, event, **kwargs):
+        return self.help() + \
+            f' Ich schaue alle {self.poll_interval * 10} Sekunden nach ' + \
+            'anstehenden Terminen. Die Orte, an denen ich nach Terminen schaue, ' + \
+            'können mit ls, add, rm verändert werden.\n' + \
+            '- ls: listet die aktuellen Orte/URLs auf\n' + \
+            '- add URL TYPE (nur für Admins): fügt eine URL hinzu. Mögliche ' + \
+            'Werte für TYPE sind frab, labor_rss, ical, custom.' + \
+            '- rm URL (nur für Admins): entfernt eine URL'
