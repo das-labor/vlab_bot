@@ -102,7 +102,7 @@ class MatrixModule(BotModule):
     def long_help(self, bot, event, **kwargs):
         text = self.help() + \
             ' Neue Erinnerungen können mit Angabe eines Datums ' + \
-            'hinzugefügt werden:\n ' +\
+            'hinzugefügt werden:\n' +\
             '!remember 2042-01-01T00:01 Sylvester'
 
         if bot.is_owner(event):
