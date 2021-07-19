@@ -110,6 +110,7 @@ class MatrixModule(BotModule):
             await bot.send_text(room, 
                 '🔎 Im Wiki gab es ein paar Änderungen:\n' + msg)
             self._set_last_sent_now()
+            bot.save_settings()
 
     def help(self):
         return "🔎 Durchsuche das Labor-Wiki. Berichte über Änderungen am Wiki."
