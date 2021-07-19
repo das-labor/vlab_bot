@@ -38,7 +38,7 @@ class MatrixModule(PollingService):
             self.accountroomid_lastsent = data['lastsent']
 
     def help(self):
-        return "Notify about Space-API (https://spaceapi.io/) status changes."
+        return "Notify about Space-API status changes (open or closed)."
 
     def long_help(self, bot, event, **kwargs):
         return self.help() + \
@@ -46,4 +46,5 @@ class MatrixModule(PollingService):
             'commands: list, debug, poll, clear, add URL, del URL\n' + \
             '!spaceapi add URL: to add a space-api endpoint\n' + \
             '!spaceapi list: to list the endpoint configured for this room.\n' + \
-            f'I will look for changes roughly every {self.poll_interval_min} minutes.'
+            f'I will look for changes roughly every {self.poll_interval_min} ' + \
+            'minutes. Find out more about Space-API at https://spaceapi.io/.'
