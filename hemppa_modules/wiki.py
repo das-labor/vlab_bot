@@ -28,8 +28,8 @@ class MatrixModule(BotModule):
 
     def _set_last_sent_now(self):
         'remember last sent entry'
-        now = datetime.now().isoformat()
-        self.config.set_value(self.config_key, now)
+        now = datetime.now()
+        self.config.set_value(self.config_key, now.isoformat())
         self.last_sent = now
 
     def _get_last_sent(self):
@@ -42,13 +42,13 @@ class MatrixModule(BotModule):
 
     def get_settings(self):
         data = super().get_settings()
-        data['last_sent'] = self.last_sent
+        data['last_sent'] = self.last_sent.isoformat()
         return data
 
     def set_settings(self, data):
         super().set_settings(data)
         if data.get('last_sent'):
-            self.last_sent = data['last_sent']
+            self.last_sent = datetime.fromisoformat(data['last_sent'])
 
     async def matrix_message(self, bot, room, event):
         # !wiki some query
