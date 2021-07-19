@@ -91,6 +91,7 @@ class MatrixModule(BotModule):
 
         now = datetime.now()
         duration = now - self._get_last_sent()
+        self.logger.debug(f'Time since last post: {duration}')
         if duration.days >= 1:
             self.logger.debug('polling recent changes')
             await self._check_recent_changes(bot, room)
