@@ -98,3 +98,14 @@ class MatrixModule(BotModule):
 
     def help(self):
         return "📅 Ich erinnere an Dinge."
+
+    def long_help(self, bot, event, **kwargs):
+        text = self.help() + \
+            ' Neue Erinnerungen können mit Angabe eines Datums ' + \
+            'hinzugefügt werden: !remember 2042-01-01T00:01 Sylvester'
+
+        if bot.is_owner(event):
+            text += '!remember ls listet aktuelle Erinnerungen auf.'
+
+        return text
+    
