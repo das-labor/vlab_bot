@@ -16,6 +16,8 @@ RECENT_CHANGES_URL = WIKI_BASE_URL + \
     '/api.php?action=feedrecentchanges&hidebots=1&hideminor=1&days=1&limit=10' + \
     '&namespace=0&feedformat=atom'
 
+# TODO use settings property for last_sent instead of db
+
 class MatrixModule(BotModule):
     def __init__(self,name):
         super().__init__(name)
