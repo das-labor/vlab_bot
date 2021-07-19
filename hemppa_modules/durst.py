@@ -41,10 +41,9 @@ class MatrixModule(BotModule):
         return answer
 
     def help(self):
-        return "🥛 Infos über die Getränkeliste - !durst [NUM]"
+        return "🥛 Infos über die Getränkeliste."
 
     def long_help(self, bot, room, event, args):
         return self.help() + \
-            '\n Mit NUM kann eine Obergrenze für die Getränke festgelegt werden. ' + \
-                'Getränke mit einem Bestand unterhalb der Grenze werden angezeigt.'
-        
+            '\nMit "!durst NUM" kann eine Obergrenze für die Getränke festgelegt werden. ' + \
+            'Getränke mit einem Bestand unterhalb der Grenze werden angezeigt.'
