@@ -116,3 +116,9 @@ class MatrixModule(BotModule):
 
     def help(self):
         return "🔎 Durchsuche das Labor-Wiki. Berichte über Änderungen am Wiki."
+
+    def long_help(self, bot, event, **kwargs):
+        return self.help() + \
+            f'Ich schaue alle {self.poll_interval * 10} Sekunden im Wiki nach ' + \
+            f'Änderungen. Zuletzt war dies am {self.last_sent}.'
+
