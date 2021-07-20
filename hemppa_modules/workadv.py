@@ -6,8 +6,6 @@ NUM_CLIENTS_MARKER = 'workadventure_nb_clients_per_room'
 class MatrixModule(PollingService):
     def __init__(self, name):
         super().__init__(name)
-        self.poll_interval_min = 10
-        self.poll_interval_random = 1
         self.accountroomid_lastnumonline = {}
 
     async def poll_implementation(self, bot, account, roomid, send_messages):
@@ -55,4 +53,6 @@ class MatrixModule(PollingService):
             ' This is a polling service. Therefore there are additional ' + \
             'commands: list, debug, poll, clear, add URL, del URL\n' + \
             '!wordadv add URL: to add a new endpoint. URL has the form\n' + \
-            'ROOM@METRICS_URL e.g. _/global/das-labor.github.io/workadv_das-labor/main.json@https://pusher.wa.binary-kitchen.de/metrics,'
+            'ROOM@METRICS_URL e.g.\n' + \
+            '_/global/das-labor.github.io/workadv_das-labor/main.json@https://pusher.wa.binary-kitchen.de/metrics\n' + \
+            f'I will check for changes roughly every {self.poll_interval_min} minutes.'

@@ -6,8 +6,6 @@ import time
 class MatrixModule(PollingService):
     def __init__(self, name):
         super().__init__(name)
-        self.poll_interval_min = 10
-        self.poll_interval_random = 1
         self.accountroomid_laststatus = {}
 
     async def poll_implementation(self, bot, account, roomid, send_messages):
