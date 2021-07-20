@@ -12,18 +12,23 @@ class MatrixModule(PollingService):
 
     async def poll_implementation(self, bot, account, roomid, send_messages):
         self.logger.debug(f'polling space api {account}.')
-        with urlopen(account, timeout=5) as response:
+        spacename, is_open = MatrixModule.open_status(account)
+        open_str = 'open 🔓' if is_open else 'closed 🔒'
+        last_status = self.accountroomid_laststatus.get(account+roomid, False)
+        text = f'{spacename} is now {open_str}'
+        self.logger.debug(text)
+
+        if send_messages and last_status != is_open:
+            await bot.send_text(bot.get_room_by_id(roomid), text)
+            self.accountroomid_laststatus[account+roomid] = is_open
+            bot.save_settings()
+
+    @staticmethod
+    def open_status(spaceurl):
+        with urlopen(spaceurl, timeout=5) as response:
             js = json.load(response)
 
-        spacename = js['space']
-        open = 'open 🔓' if js['state']['open'] else 'closed 🔒'
-        last_status = self.accountroomid_laststatus.get(account+roomid, False)
-        text = f'{spacename} is now {open}'
-
-        if send_messages and last_status != open:
-            await bot.send_text(bot.get_room_by_id(roomid), text)
-            self.accountroomid_laststatus[account+roomid] = js['state']['open']
-            bot.save_settings()
+        return js['space'], js['state']['open']
 
     def get_settings(self):
         data = super().get_settings()

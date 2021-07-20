@@ -1,9 +1,9 @@
 from modules.common.module import BotModule
 from urllib.request import urlopen
 import json
+from .spaceapi import MatrixModule as SpaceApi
 
-
-LABOR_STATUS_URL = "https://das-labor.org/status/status.php?status"
+LABOR_STATUS_URL = "https://das-labor.org/status/api"
 
 FREIFUNK_API ='http://map.freifunk-bochum.de:4000/nodes.json'
 # FF_LABOR, FF_LABOR_LOUNGE
@@ -15,13 +15,10 @@ class MatrixModule(BotModule):
         await self.freifunk_nodes(bot, room)
 
     async def open_closed(self, bot, room):
-        with urlopen(LABOR_STATUS_URL, timeout=5) as response:
-            status = response.read().decode()
+        _spacename, is_open = SpaceApi.open_status(LABOR_STATUS_URL)
 
-        if status=='OPEN': icon = "🔓" 
-        elif status=='CLOSED': icon = "🔒"
-        else: icon = '?'
-        msg = f'Geöffnet? {status} {icon}\n'
+        icon = "🔓" if is_open else "🔒"
+        msg = f'Geöffnet? {is_open} {icon}\n'
         await bot.send_text(room, msg)
 
     async def freifunk_nodes(self, bot, room):
