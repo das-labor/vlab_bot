@@ -8,34 +8,32 @@ class MatrixModule(PollingService):
         super().__init__(name)
         self.poll_interval_min = 10
         self.poll_interval_random = 1
-        self.accountroomid_lastsent = {}
+        self.accountroomid_laststatus = {}
 
     async def poll_implementation(self, bot, account, roomid, send_messages):
         self.logger.debug(f'polling space api {account}.')
         with urlopen(account, timeout=5) as response:
             js = json.load(response)
 
-        space = js['space']
+        spacename = js['space']
         open = 'open 🔓' if js['state']['open'] else 'closed 🔒'
-        last_change = js['state']['lastchange']
-        last_sent = self.accountroomid_lastsent.get(account+roomid, -1)
-        self.logger.debug(f'seconds since last update {time.time()-last_change}')
-        text = f'{space} is now {open}'
+        last_status = self.accountroomid_laststatus.get(account+roomid, False)
+        text = f'{spacename} is now {open}'
 
-        if send_messages and last_sent < last_change:
+        if send_messages and last_status != open:
             await bot.send_text(bot.get_room_by_id(roomid), text)
-            self.accountroomid_lastsent[account+roomid] = time.time()
+            self.accountroomid_laststatus[account+roomid] = js['state']['open']
             bot.save_settings()
 
     def get_settings(self):
         data = super().get_settings()
-        data['lastsent'] = self.accountroomid_lastsent
+        data['laststatus'] = self.accountroomid_laststatus
         return data
 
     def set_settings(self, data):
         super().set_settings(data)
-        if data.get('lastsent'):
-            self.accountroomid_lastsent = data['lastsent']
+        if data.get('laststatus'):
+            self.accountroomid_laststatus = data['laststatus']
 
     def help(self):
         return "Notify about Space-API status changes (open or closed)."
