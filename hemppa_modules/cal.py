@@ -48,6 +48,7 @@ class CalDB(Database):
             "SELECT url,type FROM cal_subscription"
         )]
 
+# TODO Make this a polling service
 
 class MatrixModule(BotModule):
     def __init__(self, name):
