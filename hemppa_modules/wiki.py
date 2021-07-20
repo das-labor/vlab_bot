@@ -123,4 +123,5 @@ class MatrixModule(BotModule):
         return self.help() + \
             f' Ich schaue alle {self.poll_interval * 10 // 60 // 60} Stunden ' + \
                 'im Wiki nach ' + \
-            f'Änderungen. Zuletzt habe ich darüber am {self.last_sent} informiert.'
+            f'Änderungen. Zuletzt habe ich darüber am {self.last_sent} informiert.\n' +\
+            'Mit "!wiki QUERY" kannst da das Wiki durchsuchen.'
