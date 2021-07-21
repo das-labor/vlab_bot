@@ -7,6 +7,7 @@ class MatrixModule(PollingService):
     def __init__(self, name):
         super().__init__(name)
         self.accountroomid_lastnumonline = {}
+        self.template = '{num_clients} entities online'
 
     async def poll_implementation(self, bot, account, roomid, send_messages):
         self.logger.debug(f'polling workadventure {account}.')
@@ -31,18 +32,21 @@ class MatrixModule(PollingService):
 
                 if send_messages and num_clients_online != last_num_online:
                     await bot.send_text(bot.get_room_by_id(roomid), 
-                        f'{num_clients_online} entities online')
+                        self.template.format(num_clients=num_clients_online))
                     break
 
     def get_settings(self):
         data = super().get_settings()
         data['last_num_online'] = self.accountroomid_lastnumonline
+        data['template'] = self.template
         return data
 
     def set_settings(self, data):
         super().set_settings(data)
         if data.get('last_num_online'):
             self.accountroomid_lastsent = data['last_num_online']
+        if data.get('template'):
+            self.template = data['template']
 
     def help(self):
         return "Notify about entities in a work adventure instances."
