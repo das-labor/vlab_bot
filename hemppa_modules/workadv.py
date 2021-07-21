@@ -26,13 +26,12 @@ class MatrixModule(PollingService):
 
                 last_num_online = self.accountroomid_lastnumonline.get(account+roomid, 0)
                 self.logger.debug(f'last num online {last_num_online}')
+                self.accountroomid_lastnumonline[account+roomid] = num_clients_online
+                bot.save_settings()
 
                 if send_messages and num_clients_online != last_num_online:
                     await bot.send_text(bot.get_room_by_id(roomid), 
                         f'{num_clients_online} entities online')
-
-                    self.accountroomid_lastnumonline[account+roomid] = num_clients_online
-                    bot.save_settings()
                     break
 
     def get_settings(self):
