@@ -5,7 +5,6 @@ import urllib.parse
 import json
 import os
 from datetime import datetime
-from .db import Config
 
 NUM_RESULTS = 3
 WIKI_BASE_URL = "https://wiki.das-labor.org"
@@ -16,31 +15,12 @@ RECENT_CHANGES_URL = WIKI_BASE_URL + \
     '/api.php?action=feedrecentchanges&hidebots=1&hideminor=1&days=1&limit=10' + \
     '&namespace=0&feedformat=atom'
 
-# TODO use settings property for last_sent instead of db
 
 class MatrixModule(BotModule):
     def __init__(self,name):
         super().__init__(name)
         self.poll_interval = 6 * 60 * 24 # * 10 seconds
-        self.config = Config()
-        self.config_key = 'wiki_last_sent'
-        if self._get_last_sent() is None:
-            self._set_last_sent_now()
-        self.last_sent = self._get_last_sent()
-
-    def _set_last_sent_now(self):
-        'remember last sent entry'
-        now = datetime.now()
-        self.config.set_value(self.config_key, now.isoformat())
-        self.last_sent = now
-
-    def _get_last_sent(self):
-        'return datetime of last sent announcement'
-        v = self.config.get_value(self.config_key)
-        if v is not None:
-            return datetime.fromisoformat(v)
-        else:
-            return v
+        self.last_sent = datetime.now()
 
     def get_settings(self):
         data = super().get_settings()
@@ -90,7 +70,7 @@ class MatrixModule(BotModule):
             return
 
         now = datetime.now()
-        duration = now - self._get_last_sent()
+        duration = now - self.last_sent
         self.logger.debug(f'Time since last post: {duration}')
         if duration.days >= 1:
             self.logger.debug('polling recent changes')
@@ -113,7 +93,7 @@ class MatrixModule(BotModule):
             self.logger.debug('posting recent changes')
             await bot.send_text(room, 
                 '🔎 Im Wiki gab es ein paar Änderungen:\n' + msg)
-            self._set_last_sent_now()
+            self.last_sent = datetime.now()
             bot.save_settings()
 
     def help(self):
