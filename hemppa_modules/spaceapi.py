@@ -3,6 +3,9 @@ from urllib.request import urlopen
 import json
 import time
 
+# TODO can be removed, if PR accepted
+# https://github.com/vranki/hemppa/pull/162
+
 class MatrixModule(PollingService):
     def __init__(self, name):
         super().__init__(name)
