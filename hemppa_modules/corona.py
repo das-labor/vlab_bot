@@ -44,14 +44,16 @@ class MatrixModule(PollingService):
             self.template = data['template']
 
     def help(self):
-        return "Notify about changes in incidence."
+        return "Notify about changes of Corona-incidence in NRW."
 
     def long_help(self, bot, event, **kwargs):
         return self.help() + \
-            ' This is a polling service. Therefore there are additional ' + \
+            '\nThis is a polling service. Therefore there are additional ' + \
             'commands: list, debug, poll, clear, add, del\n' + \
             '!corona add CITY:ID will add CITY with ID to the polling database.\n' +\
             'e.g. Bochum:5911, Dortmund:5913, Herne:5916, Essen:5113, ' + \
-            'Recklinghausen:5562 Look at https://www.lzg.nrw.de to find out more ids. ' +\
-            f'I will check for changes roughly every {self.poll_interval_min} minutes.' +\
+            'Recklinghausen:5562\nLook at ' +\
+            'https://www.lzg.nrw.de/inf_schutz/corona_meldelage/index.html to ' +\
+            'find out more IDs of cities and the data itself. ' +\
+            f'I will check for changes roughly every {self.poll_interval_min} minutes. ' +\
             f'The service will use the following template:\n"{self.template}"'
