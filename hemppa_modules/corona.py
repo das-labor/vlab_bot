@@ -5,7 +5,7 @@ class MatrixModule(PollingService):
     def __init__(self, name):
         super().__init__(name)
         self.cityid_incidence = {}
-        self.template = 'The incidence for {city} changed from {last_incidence} to {incidence}'
+        self.template = 'The incidence for {city} changed from {last_incidence} to {incidence} {icon}'
 
     async def poll_implementation(self, bot, account, roomid, send_messages):
         city, city_id = account.split(':')
@@ -23,8 +23,9 @@ class MatrixModule(PollingService):
         self.logger.debug(f'Incidence for {city}: {incidence}')
 
         last_incidence = self.cityid_incidence.get(city_id, 0)
+        icon = '↗️' if incidence > last_incidence else '↘️'
         if city_id not in self.cityid_incidence or incidence != last_incidence:
-            text = self.template.format(
+            text = self.template.format(icon=icon,
                 city=city, last_incidence=last_incidence, incidence=incidence)
             await bot.send_text(bot.get_room_by_id(roomid), text)
             self.cityid_incidence[city_id] = incidence
