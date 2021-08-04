@@ -22,13 +22,13 @@ class MatrixModule(PollingService):
             str(lines[-1], encoding='UTF8').split(',')[idx_7day_incidence])
         self.logger.debug(f'Incidence for {city}: {incidence}')
 
-        last_incidence = self.cityid_incidence.get(city_id, 0)
+        last_incidence = self.cityid_incidence.get(city_id+roomid, 0)
         icon = '↗️' if incidence > last_incidence else '↘️'
-        if city_id not in self.cityid_incidence or incidence != last_incidence:
+        if city_id+roomid not in self.cityid_incidence or incidence != last_incidence:
             text = self.template.format(icon=icon,
                 city=city, last_incidence=last_incidence, incidence=incidence)
             await bot.send_text(bot.get_room_by_id(roomid), text)
-            self.cityid_incidence[city_id] = incidence
+            self.cityid_incidence[city_id+roomid] = incidence
             bot.save_settings()
 
     def get_settings(self):
