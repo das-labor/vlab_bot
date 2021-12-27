@@ -276,7 +276,7 @@ class MatrixModule(BotModule):
 
         if bot.is_owner(event):
             text += \
-                '!cal add URL TYPE: fügt eine URL ' + \
+                '!cal add TYPE URL: fügt eine URL ' + \
                 'hinzu. Mögliche Werte für TYPE sind frab, ical, custom.\n' + \
                 '!cal rm URL: entfernt eine URL'
 
