@@ -49,7 +49,7 @@ class MatrixModule(PollingService):
             self.template = data['template']
 
     def help(self):
-        return "Notify about entities in a work adventure instances."
+        return "Notify about entities in a work adventure instance."
 
     def long_help(self, bot, event, **kwargs):
         return self.help() + \
